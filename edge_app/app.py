@@ -53,6 +53,20 @@ def inject_glove_ui_css() -> None:
     st.markdown(
         """
         <style>
+          /* Bright, readable default surfaces */
+          .stApp,
+          section.main,
+          section.main > div,
+          [data-testid="stAppViewContainer"],
+          [data-testid="stHeader"] {
+            background: #ffffff !important;
+          }
+
+          /* Blue typography for titles and section headers */
+          h1, h2, h3 {
+            color: #0b5ed7 !important;
+          }
+
           /* Mobile-friendly layout */
           section.main > div { max-width: 860px; padding-top: 1rem; padding-bottom: 2.5rem; }
 
@@ -65,6 +79,23 @@ def inject_glove_ui_css() -> None:
             font-weight: 750 !important;
             border-radius: 18px !important;
             padding: 14px 18px !important;
+            background: #0b5ed7 !important;
+            color: #ffffff !important;
+            border: 1px solid #0a53be !important;
+          }
+
+          .stButton > button:hover,
+          button[kind="primary"]:hover,
+          button[kind="secondary"]:hover {
+            background: #0a53be !important;
+            border-color: #0848a4 !important;
+            color: #ffffff !important;
+          }
+
+          .stButton > button:focus,
+          button[kind="primary"]:focus,
+          button[kind="secondary"]:focus {
+            box-shadow: 0 0 0 0.2rem rgba(11, 94, 215, 0.25) !important;
           }
 
           /* Make inputs easier to hit */
