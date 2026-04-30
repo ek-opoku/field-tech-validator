@@ -5,6 +5,72 @@ import plotly.express as px
 
 st.set_page_config(layout="wide")
 
+st.markdown(
+    """
+    <style>
+      /* Water app theme: clean white surfaces */
+      .stApp,
+      [data-testid="stAppViewContainer"],
+      [data-testid="stHeader"],
+      section.main,
+      section.main > div {
+        background: #ffffff !important;
+      }
+
+      /* Keep text highly readable on white */
+      .stApp,
+      .stApp p,
+      .stApp span,
+      .stApp div,
+      .stApp label,
+      .stMarkdown,
+      .stCaption {
+        color: #0f172a !important;
+      }
+
+      /* Blue titles and section headers */
+      h1, h2, h3 {
+        color: #0b5ed7 !important;
+      }
+
+      /* Streamlit tabs styled for water theme */
+      button[data-baseweb="tab"] {
+        background: #eff6ff !important;
+        color: #0f172a !important;
+        border-radius: 10px !important;
+      }
+      button[data-baseweb="tab"][aria-selected="true"] {
+        background: #0b5ed7 !important;
+        color: #ffffff !important;
+      }
+
+      /* Blue buttons with good contrast */
+      .stButton > button,
+      button[kind="primary"],
+      button[kind="secondary"] {
+        background: #0b5ed7 !important;
+        color: #ffffff !important;
+        border: 1px solid #0a53be !important;
+        border-radius: 10px !important;
+      }
+      .stButton > button:hover,
+      button[kind="primary"]:hover,
+      button[kind="secondary"]:hover {
+        background: #0a53be !important;
+        border-color: #0848a4 !important;
+      }
+
+      /* Inputs stay legible */
+      div[data-baseweb="input"] input,
+      div[data-baseweb="select"] * {
+        color: #0f172a !important;
+        background: #ffffff !important;
+      }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 @st.cache_data
 def load_data():
     file_path = "data_wide.csv"
@@ -30,6 +96,14 @@ def load_data():
         return pd.DataFrame(dummy_data)
 
 df = load_data()
+WATER_SCALE = [
+    [0.0, "#dbeafe"],
+    [0.25, "#93c5fd"],
+    [0.5, "#38bdf8"],
+    [0.75, "#0ea5e9"],
+    [1.0, "#0b5ed7"],
+]
+WATER_LINE_COLORS = ["#0b5ed7", "#0284c7", "#06b6d4"]
 
 st.title('💧 FieldOps Groundwater Validator')
 
@@ -82,14 +156,20 @@ with tab2:
             color=column_name,
             size=df_map[column_name].abs(),
             hover_name="MonitoringLocationIdentifier",
-            color_continuous_scale=px.colors.sequential.Plasma,
+            color_continuous_scale=WATER_SCALE,
             size_max=15,
             zoom=7,
             mapbox_style="carto-positron",
             title=f"Spatial Distribution of {param_name}",
             height=800
         )
-        fig.update_layout(margin={"r":0,"t":40,"l":0,"b":0})
+        fig.update_layout(
+            margin={"r": 0, "t": 40, "l": 0, "b": 0},
+            paper_bgcolor="#ffffff",
+            plot_bgcolor="#ffffff",
+            font={"color": "#0f172a"},
+            coloraxis_colorbar={"title": param_name},
+        )
         return fig
         
     if compare_mode:
@@ -106,14 +186,53 @@ with tab3:
     
     col1, col2 = st.columns(2)
     with col1:
-        fig_ph = px.line(df, x="ActivityStartDate", y="pH (standard units)", title="pH Over Time")
+        fig_ph = px.line(
+            df,
+            x="ActivityStartDate",
+            y="pH (standard units)",
+            title="pH Over Time",
+            color_discrete_sequence=[WATER_LINE_COLORS[0]],
+            markers=True,
+        )
+        fig_ph.update_layout(
+            template="plotly_white",
+            paper_bgcolor="#ffffff",
+            plot_bgcolor="#ffffff",
+            font={"color": "#0f172a"},
+        )
         st.plotly_chart(fig_ph, use_container_width=True)
         
     with col2:
-        fig_temp = px.line(df, x="ActivityStartDate", y="Temperature, water (deg C)", title="Temperature Over Time")
+        fig_temp = px.line(
+            df,
+            x="ActivityStartDate",
+            y="Temperature, water (deg C)",
+            title="Temperature Over Time",
+            color_discrete_sequence=[WATER_LINE_COLORS[1]],
+            markers=True,
+        )
+        fig_temp.update_layout(
+            template="plotly_white",
+            paper_bgcolor="#ffffff",
+            plot_bgcolor="#ffffff",
+            font={"color": "#0f172a"},
+        )
         st.plotly_chart(fig_temp, use_container_width=True)
         
-    fig_scatter = px.scatter(df, x="Temperature, water (deg C)", y="Oxygen, dissolved (mg/L)", title="Temperature vs Dissolved Oxygen")
+    fig_scatter = px.scatter(
+        df,
+        x="Temperature, water (deg C)",
+        y="Oxygen, dissolved (mg/L)",
+        title="Temperature vs Dissolved Oxygen",
+        color_discrete_sequence=[WATER_LINE_COLORS[2]],
+    )
+    fig_scatter.update_traces(marker={"size": 10, "opacity": 0.85})
+    fig_scatter.update_layout(
+        template="plotly_white",
+        paper_bgcolor="#ffffff",
+        plot_bgcolor="#ffffff",
+        font={"color": "#0f172a"},
+    )
     st.plotly_chart(fig_scatter, use_container_width=True)
 
 
