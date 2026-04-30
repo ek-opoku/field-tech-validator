@@ -86,6 +86,28 @@ def inject_glove_ui_css() -> None:
             color: #0b5ed7 !important;
           }
 
+          /* Blue sidebar with white text */
+          [data-testid="stSidebar"] {
+            background: #0b5ed7 !important;
+            border-right: 1px solid #0a53be !important;
+          }
+          [data-testid="stSidebar"] * {
+            color: #ffffff !important;
+          }
+          [data-testid="stSidebar"] .stTextInput input,
+          [data-testid="stSidebar"] .stNumberInput input,
+          [data-testid="stSidebar"] [data-baseweb="select"] > div {
+            background: #0a53be !important;
+            color: #ffffff !important;
+            border-color: #ffffff !important;
+          }
+          [data-testid="stSidebar"] .stTextInput input::placeholder {
+            color: rgba(255, 255, 255, 0.85) !important;
+          }
+          [data-testid="stSidebarNav"] a {
+            color: #ffffff !important;
+          }
+
           /* Mobile-friendly layout */
           section.main > div { max-width: 860px; padding-top: 1rem; padding-bottom: 2.5rem; }
 

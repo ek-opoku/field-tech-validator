@@ -1,4 +1,5 @@
 import streamlit as st
+from app_theme import apply_water_theme
 import datetime as dt
 from pathlib import Path
 from gateway_sync.gateway_bridge import (
@@ -7,6 +8,7 @@ from gateway_sync.gateway_bridge import (
 )
 
 st.set_page_config(page_title="Gateway Sync", layout="wide")
+apply_water_theme()
 st.title("🔄 Gateway Sync & Buffering")
 st.write("Monitor offline readings and manually trigger sync to the central cloud database.")
 

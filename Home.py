@@ -2,74 +2,10 @@ import streamlit as st
 import pandas as pd
 import os
 import plotly.express as px
+from app_theme import apply_water_theme
 
 st.set_page_config(layout="wide")
-
-st.markdown(
-    """
-    <style>
-      /* Water app theme: clean white surfaces */
-      .stApp,
-      [data-testid="stAppViewContainer"],
-      [data-testid="stHeader"],
-      section.main,
-      section.main > div {
-        background: #ffffff !important;
-      }
-
-      /* Keep text highly readable on white */
-      .stApp,
-      .stApp p,
-      .stApp span,
-      .stApp div,
-      .stApp label,
-      .stMarkdown,
-      .stCaption {
-        color: #0f172a !important;
-      }
-
-      /* Blue titles and section headers */
-      h1, h2, h3 {
-        color: #0b5ed7 !important;
-      }
-
-      /* Streamlit tabs styled for water theme */
-      button[data-baseweb="tab"] {
-        background: #eff6ff !important;
-        color: #0f172a !important;
-        border-radius: 10px !important;
-      }
-      button[data-baseweb="tab"][aria-selected="true"] {
-        background: #0b5ed7 !important;
-        color: #ffffff !important;
-      }
-
-      /* Blue buttons with good contrast */
-      .stButton > button,
-      button[kind="primary"],
-      button[kind="secondary"] {
-        background: #0b5ed7 !important;
-        color: #ffffff !important;
-        border: 1px solid #0a53be !important;
-        border-radius: 10px !important;
-      }
-      .stButton > button:hover,
-      button[kind="primary"]:hover,
-      button[kind="secondary"]:hover {
-        background: #0a53be !important;
-        border-color: #0848a4 !important;
-      }
-
-      /* Inputs stay legible */
-      div[data-baseweb="input"] input,
-      div[data-baseweb="select"] * {
-        color: #0f172a !important;
-        background: #ffffff !important;
-      }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+apply_water_theme()
 
 @st.cache_data
 def load_data():

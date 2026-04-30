@@ -59,6 +59,49 @@ def inject_glove_ui_css() -> None:
     st.markdown(
         """
         <style>
+          /* White app background + readable text */
+          .stApp,
+          section.main,
+          section.main > div,
+          [data-testid="stAppViewContainer"],
+          [data-testid="stHeader"] {
+            background: #ffffff !important;
+          }
+          .stApp,
+          .stApp p,
+          .stApp span,
+          .stApp div,
+          .stApp label,
+          .stMarkdown,
+          .stCaption {
+            color: #111827 !important;
+          }
+          h1, h2, h3 {
+            color: #0b5ed7 !important;
+          }
+
+          /* Blue sidebar with white text */
+          [data-testid="stSidebar"] {
+            background: #0b5ed7 !important;
+            border-right: 1px solid #0a53be !important;
+          }
+          [data-testid="stSidebar"] * {
+            color: #ffffff !important;
+          }
+          [data-testid="stSidebar"] .stTextInput input,
+          [data-testid="stSidebar"] .stNumberInput input,
+          [data-testid="stSidebar"] [data-baseweb="select"] > div {
+            background: #0a53be !important;
+            color: #ffffff !important;
+            border-color: #ffffff !important;
+          }
+          [data-testid="stSidebar"] .stTextInput input::placeholder {
+            color: rgba(255, 255, 255, 0.85) !important;
+          }
+          [data-testid="stSidebarNav"] a {
+            color: #ffffff !important;
+          }
+
           /* Mobile-friendly layout */
           section.main > div { max-width: 860px; padding-top: 1rem; padding-bottom: 2.5rem; }
 
@@ -71,6 +114,15 @@ def inject_glove_ui_css() -> None:
             font-weight: 750 !important;
             border-radius: 18px !important;
             padding: 14px 18px !important;
+            background: #0b5ed7 !important;
+            color: #ffffff !important;
+            border: 1px solid #0a53be !important;
+          }
+          .stButton > button:hover,
+          button[kind="primary"]:hover,
+          button[kind="secondary"]:hover {
+            background: #0a53be !important;
+            border-color: #0848a4 !important;
           }
 
           /* Make inputs easier to hit */

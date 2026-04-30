@@ -1,4 +1,5 @@
 import streamlit as st
+from app_theme import apply_water_theme
 import datetime as dt
 from pathlib import Path
 from cloud_analytics.chain_of_custody_report import (
@@ -8,6 +9,7 @@ from cloud_analytics.chain_of_custody_report import (
 )
 
 st.set_page_config(page_title="Chain of Custody Reports", layout="wide")
+apply_water_theme()
 st.title("📄 Chain of Custody Reporting")
 st.write("Generate and download automated Chain of Custody PDFs with QA/QC flags for synced batch CSVs.")
 

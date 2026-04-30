@@ -5,10 +5,14 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+from app_theme import apply_water_theme
 
 
 APP_TITLE = "Centralized Field Data Dashboard"
 DATA_PATH = Path(__file__).resolve().parents[1] / "processed_water_data.csv"
+WATER_DEEP_BLUE = "#0b5ed7"
+WATER_MID_BLUE = "#0284c7"
+WATER_AQUA = "#06b6d4"
 
 
 RAW_TO_CLEAN = {
@@ -200,6 +204,7 @@ def ortools_route(points: list[tuple[float, float]]) -> tuple[list[int], float] 
 
 
 st.set_page_config(page_title=APP_TITLE, layout="wide", initial_sidebar_state="expanded")
+apply_water_theme()
 powerbi_css()
 
 st.markdown(
@@ -331,7 +336,7 @@ def sparkline(data: pd.DataFrame, y: str, title: str):
         return
     c = (
         alt.Chart(s)
-        .mark_line(color="#2F5597", strokeWidth=2)
+        .mark_line(color=WATER_DEEP_BLUE, strokeWidth=2)
         .encode(
             x=alt.X("_date:T", title=None, axis=alt.Axis(labels=False, ticks=False, domain=False)),
             y=alt.Y(f"{y}:Q", title=None),
@@ -413,12 +418,12 @@ else:
     latest["risk_score"] = latest.apply(risk_row, axis=1)
 
     def color_for(score: float) -> list[int]:
-        # Power BI-like traffic-light colors
+        # Water-themed risk ramp (light aqua -> deep blue)
         if score >= 70:
-            return [220, 38, 38, 210]  # red
+            return [11, 94, 215, 220]  # deep blue
         if score >= 40:
-            return [245, 158, 11, 210]  # amber
-        return [16, 185, 129, 210]  # green
+            return [2, 132, 199, 220]  # medium blue
+        return [6, 182, 212, 220]  # aqua
 
     latest["color"] = latest["risk_score"].apply(color_for)
 
@@ -464,7 +469,7 @@ else:
         get_path="path",
         get_width=4,
         width_min_pixels=2,
-        get_color=[47, 85, 151, 180],
+        get_color=[11, 94, 215, 190],
     )
 
     tooltip = {
