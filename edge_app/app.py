@@ -62,6 +62,25 @@ def inject_glove_ui_css() -> None:
             background: #ffffff !important;
           }
 
+          /* High-contrast text on white backgrounds */
+          .stApp,
+          .stApp p,
+          .stApp span,
+          .stApp div,
+          .stApp label,
+          .stMarkdown,
+          .stCaption {
+            color: #111827 !important;
+          }
+
+          /* Keep form controls readable */
+          div[data-baseweb="input"] input,
+          div[data-baseweb="textarea"] textarea,
+          div[data-baseweb="select"] * {
+            color: #111827 !important;
+            background: #ffffff !important;
+          }
+
           /* Blue typography for titles and section headers */
           h1, h2, h3 {
             color: #0b5ed7 !important;
