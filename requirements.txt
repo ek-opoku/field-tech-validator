@@ -6,6 +6,7 @@ ortools
 folium>=0.15.0
 streamlit-folium>=0.17.0
 plotly>=5.18.0
+streamlit-geolocation>=0.0.10
 
 # PDF reporting
 reportlab
