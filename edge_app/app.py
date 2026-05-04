@@ -24,7 +24,7 @@ SCHEMA_HEADERS = [
 ]
 
 INBOX_DIR = Path(__file__).resolve().parent / "inbox"
-BASELINE_SCHEMA_PATH = Path(__file__).resolve().parents[1] / "data_wide_imputed.csv"
+BASELINE_SCHEMA_PATH = Path(__file__).resolve().parents[1] / "data_wide_imputed.csv.gz"
 EDGE_HMAC_ENV = "EDGE_HMAC_SECRET"
 
 

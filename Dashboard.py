@@ -9,7 +9,7 @@ apply_water_theme()
 
 @st.cache_data
 def load_data():
-    file_path = "data_wide_imputed.csv"
+    file_path = "data_wide_imputed.csv.gz"
     if os.path.exists(file_path):
         df = pd.read_csv(file_path, parse_dates=["Date"])
         return df

@@ -43,7 +43,7 @@ Notifications (optional):
 DEFAULT_INCOMING_DIR = Path(__file__).resolve().parent / "incoming"
 DEFAULT_REPORTS_DIR = Path(__file__).resolve().parent / "reports"
 DEFAULT_STATE_PATH = Path(__file__).resolve().parent / ".coc_state.json"
-DEFAULT_PROCESSED_WATER_PATH = Path(__file__).resolve().parents[1] / "data_wide_imputed.csv"
+DEFAULT_PROCESSED_WATER_PATH = Path(__file__).resolve().parents[1] / "data_wide_imputed.csv.gz"
 
 
 EXPECTED_HEADERS = [
@@ -159,7 +159,13 @@ def compute_lta_from_processed(processed_path: Path) -> dict[str, float]:
     sums = {h: 0.0 for h in numeric_headers}
     counts = {h: 0 for h in numeric_headers}
 
-    with processed_path.open("r", newline="", encoding="utf-8") as f:
+    import gzip
+    if processed_path.suffix == '.gz':
+        f = gzip.open(processed_path, "rt", newline="", encoding="utf-8")
+    else:
+        f = processed_path.open("r", newline="", encoding="utf-8")
+        
+    with f:
         reader = csv.DictReader(f)
         if not reader.fieldnames:
             return {}

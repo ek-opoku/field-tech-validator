@@ -35,7 +35,7 @@ Central database:
 
 DEFAULT_EDGE_INBOX = Path("edge_app") / "inbox"
 DEFAULT_BUFFER_PATH = Path("gateway_sync") / "offline_buffer.csv"
-DEFAULT_PROCESSED_SCHEMA = Path("data_wide_imputed.csv")
+DEFAULT_PROCESSED_SCHEMA = Path("data_wide_imputed.csv.gz")
 
 EDGE_HMAC_ENV = "EDGE_HMAC_SECRET"
 EDGE_HMAC_STRICT_ENV = "EDGE_HMAC_STRICT"  # if "1", reject unsigned/missing sig
@@ -93,7 +93,13 @@ def load_expected_headers(processed_schema_path: Path) -> list[str]:
             "Generate it first (or place it here) so the gateway can enforce the exact schema."
         )
 
-    with processed_schema_path.open("r", newline="", encoding="utf-8") as f:
+    import gzip
+    if processed_schema_path.suffix == '.gz':
+        f = gzip.open(processed_schema_path, "rt", newline="", encoding="utf-8")
+    else:
+        f = processed_schema_path.open("r", newline="", encoding="utf-8")
+    
+    with f:
         reader = csv.reader(f)
         headers = next(reader, None)
     if not headers:

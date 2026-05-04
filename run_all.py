@@ -56,8 +56,8 @@ def main() -> int:
     )
     ap.add_argument(
         "--gateway-schema",
-        default=str(REPO_ROOT / "data_wide_imputed.csv"),
-        help="Schema CSV for gateway bridge (data_wide_imputed.csv)",
+        default=str(REPO_ROOT / "data_wide_imputed.csv.gz"),
+        help="Schema CSV for gateway bridge (data_wide_imputed.csv.gz)",
     )
     args = ap.parse_args()
 

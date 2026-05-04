@@ -36,3 +36,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Large uncompressed datasets
+data_wide_imputed.csv
