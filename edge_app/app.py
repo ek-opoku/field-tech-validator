@@ -15,8 +15,8 @@ import streamlit as st
 
 # These must match the backend/database schema EXACTLY (spelling, punctuation, spacing).
 SCHEMA_HEADERS = [
-    "ActivityStartDate",
-    "MonitoringLocationIdentifier",
+    "Date",
+    "SiteID",
     "Temperature, water (deg C)",
     "Turbidity (NTU)",
     "pH (standard units)",
@@ -24,7 +24,7 @@ SCHEMA_HEADERS = [
 ]
 
 INBOX_DIR = Path(__file__).resolve().parent / "inbox"
-BASELINE_SCHEMA_PATH = Path(__file__).resolve().parents[1] / "processed_water_data.csv"
+BASELINE_SCHEMA_PATH = Path(__file__).resolve().parents[1] / "data_wide_imputed.csv"
 EDGE_HMAC_ENV = "EDGE_HMAC_SECRET"
 
 
@@ -40,8 +40,8 @@ class Reading:
     def to_row(self) -> dict[str, str]:
         # Store as strings; gateway sync will validate headers and forward to central store.
         return {
-            "ActivityStartDate": self.activity_start_date.isoformat(),
-            "MonitoringLocationIdentifier": self.monitoring_location_identifier.strip(),
+            "Date": self.activity_start_date.isoformat(),
+            "SiteID": self.monitoring_location_identifier.strip(),
             "Temperature, water (deg C)": "" if self.temperature_c is None else f"{self.temperature_c}",
             "Turbidity (NTU)": "" if self.turbidity_ntu is None else f"{self.turbidity_ntu}",
             "pH (standard units)": "" if self.ph is None else f"{self.ph}",
@@ -522,10 +522,10 @@ st.subheader("Field reading (schema-locked)")
 
 col_a, col_b = st.columns([1, 1])
 with col_a:
-    activity_start_date = st.date_input("ActivityStartDate", value=dt.date.today())
+    activity_start_date = st.date_input("Date", value=dt.date.today())
 with col_b:
     monitoring_location_identifier = st.text_input(
-        "MonitoringLocationIdentifier",
+        "SiteID",
         placeholder="e.g., WELL-102A",
     )
 

@@ -35,7 +35,7 @@ Central database:
 
 DEFAULT_EDGE_INBOX = Path("edge_app") / "inbox"
 DEFAULT_BUFFER_PATH = Path("gateway_sync") / "offline_buffer.csv"
-DEFAULT_PROCESSED_SCHEMA = Path("processed_water_data.csv")
+DEFAULT_PROCESSED_SCHEMA = Path("data_wide_imputed.csv")
 
 EDGE_HMAC_ENV = "EDGE_HMAC_SECRET"
 EDGE_HMAC_STRICT_ENV = "EDGE_HMAC_STRICT"  # if "1", reject unsigned/missing sig
@@ -311,8 +311,8 @@ def main() -> int:
 
     # The user called out specific columns; ensure they exist in the schema we enforce.
     must_include = [
-        "ActivityStartDate",
-        "MonitoringLocationIdentifier",
+        "Date",
+        "SiteID",
         "Temperature, water (deg C)",
         "Turbidity (NTU)",
         "pH (standard units)",

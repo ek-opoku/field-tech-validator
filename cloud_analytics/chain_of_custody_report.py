@@ -43,22 +43,25 @@ Notifications (optional):
 DEFAULT_INCOMING_DIR = Path(__file__).resolve().parent / "incoming"
 DEFAULT_REPORTS_DIR = Path(__file__).resolve().parent / "reports"
 DEFAULT_STATE_PATH = Path(__file__).resolve().parent / ".coc_state.json"
-DEFAULT_PROCESSED_WATER_PATH = Path(__file__).resolve().parents[1] / "processed_water_data.csv"
+DEFAULT_PROCESSED_WATER_PATH = Path(__file__).resolve().parents[1] / "data_wide_imputed.csv"
 
 
 EXPECTED_HEADERS = [
-    "ActivityStartDate",
-    "MonitoringLocationIdentifier",
-    "ActivityLocation/LatitudeMeasure",
-    "ActivityLocation/LongitudeMeasure",
-    "Nitrate, dissolved (mg/L as N)",
-    "Nitrite, dissolved (mg/L as N)",
-    "Orthophosphate, dissolved (mg/L as P)",
-    "Oxygen, dissolved (% saturation)",
-    "Oxygen, dissolved (mg/L)",
+    "Date",
+    "SiteID",
+    "Latitude",
+    "Longitude",
     "Temperature, water (deg C)",
     "Turbidity (NTU)",
     "pH (standard units)",
+    "Oxygen, dissolved (mg/L)",
+    "Oxygen, dissolved (% saturation)",
+    "Nitrate, dissolved (mg/L as N)",
+    "Nitrite, dissolved (mg/L as N)",
+    "Orthophosphate, dissolved (mg/L as P)",
+    "Conductivity (uS/cm)",
+    "Depth to water table (m)",
+    "EdgeQCFlags",
 ]
 
 
@@ -258,7 +261,7 @@ def render_coc_pdf(
     )
 
     now = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    locations = sorted({(r.get("MonitoringLocationIdentifier") or "").strip() for r in rows if (r.get("MonitoringLocationIdentifier") or "").strip()})
+    locations = sorted({(r.get("SiteID") or "").strip() for r in rows if (r.get("SiteID") or "").strip()})
     loc_summary = ", ".join(locations[:15]) + ("…" if len(locations) > 15 else "")
 
     story = []
@@ -301,8 +304,8 @@ def render_coc_pdf(
     story.append(Paragraph("Batch preview (first 12 rows)", h2))
     preview_n = min(12, len(rows))
     preview_headers = [
-        "ActivityStartDate",
-        "MonitoringLocationIdentifier",
+        "Date",
+        "SiteID",
         "Nitrate, dissolved (mg/L as N)",
         "Temperature, water (deg C)",
         "Turbidity (NTU)",

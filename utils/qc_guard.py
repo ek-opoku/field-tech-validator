@@ -15,7 +15,7 @@ SANITY_LIMITS = {
     "nitrite": {"min": 0.0, "max": 1.0, "name": "Nitrite, dissolved (mg/L as N)"},
     "orthophosphate": {"min": 0.0, "max": 1.5, "name": "Orthophosphate, dissolved (mg/L as P)"},
     "conductivity": {"min": 0.0, "max": 1500.0, "name": "Conductivity (uS/cm)"},
-    "depth_to_water": {"min": 0.0001, "max": 100.0, "name": "Depth to water (ft)"},
+    "depth_to_water": {"min": 0.0001, "max": 100.0, "name": "Depth to water table (m)"},
 }
 
 def check_sanity_limits(params_map: Dict[str, Optional[float]]) -> List[str]:
@@ -53,7 +53,7 @@ def load_historical_bounds(schema_csv_path: Path) -> Dict[str, Dict[str, Dict[st
         "Nitrite, dissolved (mg/L as N)": "nitrite",
         "Orthophosphate, dissolved (mg/L as P)": "orthophosphate",
         "Conductivity (uS/cm)": "conductivity",
-        "Depth to water (ft)": "depth_to_water"
+        "Depth to water table (m)": "depth_to_water"
     }
     
     well_data: Dict[str, Dict[str, List[float]]] = {}
@@ -64,7 +64,7 @@ def load_historical_bounds(schema_csv_path: Path) -> Dict[str, Dict[str, Dict[st
             return {}
             
         for row in reader:
-            loc_id = row.get("MonitoringLocationIdentifier", "").strip()
+            loc_id = row.get("SiteID", "").strip()
             if not loc_id: continue
             
             if loc_id not in well_data:
@@ -124,6 +124,15 @@ def evaluate_historical_bounds(val: float, key: str, loc_id: str, historical_dat
 # =====================================================================
 COMPLIANCE_STANDARDS = {
     "None": {},
+    "USGS/EPA Groundwater Standards": {
+        "ph": {"min": 6.5, "max": 8.5, "rule": "EPA Secondary (6.5 - 8.5)"},
+        "nitrate": {"max": 10.0, "rule": "EPA MCL (10.0 mg/L as N)"},
+        "nitrite": {"max": 1.0, "rule": "EPA MCL (1.0 mg/L as N)"},
+        "orthophosphate": {"max": 0.10, "rule": "USGS High Concern (>0.1 mg/L)"},
+        "dissolved_oxygen_mg_l": {"min": 1.0, "rule": "USGS Hypoxia Limit (<1.0 mg/L)"},
+        "dissolved_oxygen_sat": {"min": 80.0, "max": 120.0, "rule": "USGS Healthy Saturation (80-120%)"},
+        "turbidity_ntu": {"max": 5.0, "rule": "Clear Water Target (<5 NTU)"},
+    },
     "Drinking Water (EPA)": {
         "ph": {"min": 6.5, "max": 8.5, "rule": "EPA Secondary"},
         "nitrate": {"max": 10.0, "rule": "EPA MCL 10 mg/L as N"},

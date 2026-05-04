@@ -5,6 +5,8 @@ def apply_water_theme() -> None:
     st.markdown(
         """
         <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
           /* Global white surface + readable text */
           .stApp,
           [data-testid="stAppViewContainer"],
@@ -12,6 +14,11 @@ def apply_water_theme() -> None:
           section.main,
           section.main > div {
             background: #ffffff !important;
+          }
+
+          /* Safely apply font to text elements without overriding icons */
+          html, body, [class*="css"], p, a, h1, h2, h3, h4, h5, h6, label, li {
+            font-family: 'Inter', sans-serif !important;
           }
 
           .stApp,
@@ -103,6 +110,27 @@ def apply_water_theme() -> None:
           [data-baseweb="tag"] {
             background: #0a53be !important;
             border-color: rgba(255, 255, 255, 0.55) !important;
+          }
+
+          /* Input fields in main area */
+          [data-testid="stForm"] input,
+          [data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+          [data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
+          [data-testid="stDateInput"] input {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+            border: 1px solid #cbd5e1 !important;
+          }
+          [data-baseweb="popover"] > div {
+            background-color: #ffffff !important;
+          }
+
+          /* Prevent font override for material icons */
+          span.material-symbols-rounded, 
+          span.material-icons,
+          .material-symbols-rounded,
+          .material-icons {
+            font-family: 'Material Symbols Rounded', 'Material Icons', sans-serif !important;
           }
         </style>
         """,

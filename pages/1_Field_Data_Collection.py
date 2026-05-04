@@ -21,7 +21,7 @@ if project_root not in sys.path:
     sys.path.append(project_root)
 
 from utils.geo_helpers import parse_sites_from_dataframe, find_nearest_site, solve_tsp, haversine_distance
-from utils.qc_guard import check_sanity_limits, load_historical_bounds, evaluate_historical_bounds, check_compliance
+from utils.qc_guard import check_sanity_limits, load_historical_bounds, evaluate_historical_bounds, check_compliance, COMPLIANCE_STANDARDS
 
 # Gateway imports for cloud sync
 from gateway_sync.gateway_bridge import is_online, post_batch_json, process_inbox_once, try_sync_once, Config, load_expected_headers, iter_incoming_csv_files
@@ -29,10 +29,10 @@ from cloud_analytics.chain_of_custody_report import render_coc_pdf, red_flags, c
 
 # These must match the backend/database schema EXACTLY
 SCHEMA_HEADERS = [
-    "ActivityStartDate",
-    "MonitoringLocationIdentifier",
-    "ActivityLocation/LatitudeMeasure",
-    "ActivityLocation/LongitudeMeasure",
+    "Date",
+    "SiteID",
+    "Latitude",
+    "Longitude",
     "Temperature, water (deg C)",
     "Turbidity (NTU)",
     "pH (standard units)",
@@ -42,13 +42,13 @@ SCHEMA_HEADERS = [
     "Nitrite, dissolved (mg/L as N)",
     "Orthophosphate, dissolved (mg/L as P)",
     "Conductivity (uS/cm)",
-    "Depth to water (ft)",
+    "Depth to water table (m)",
     "EdgeQCFlags",
 ]
 
 INBOX_DIR = Path(__file__).resolve().parents[1] / "edge_app" / "inbox"
 BUFFER_PATH = Path(__file__).resolve().parents[1] / "gateway_sync" / "offline_buffer.csv"
-BASELINE_SCHEMA_PATH = Path(__file__).resolve().parents[1] / "processed_water_data.csv"
+BASELINE_SCHEMA_PATH = Path(__file__).resolve().parents[1] / "data_wide_imputed.csv"
 EDGE_HMAC_ENV = "EDGE_HMAC_SECRET"
 
 
@@ -72,10 +72,10 @@ class Reading:
 
     def to_row(self) -> dict[str, str]:
         return {
-            "ActivityStartDate": self.activity_start_date.isoformat(),
-            "MonitoringLocationIdentifier": self.monitoring_location_identifier.strip(),
-            "ActivityLocation/LatitudeMeasure": "" if self.latitude is None else f"{self.latitude}",
-            "ActivityLocation/LongitudeMeasure": "" if self.longitude is None else f"{self.longitude}",
+            "Date": self.activity_start_date.isoformat(),
+            "SiteID": self.monitoring_location_identifier.strip(),
+            "Latitude": "" if self.latitude is None else f"{self.latitude}",
+            "Longitude": "" if self.longitude is None else f"{self.longitude}",
             "Temperature, water (deg C)": "" if self.temperature_c is None else f"{self.temperature_c}",
             "Turbidity (NTU)": "" if self.turbidity_ntu is None else f"{self.turbidity_ntu}",
             "pH (standard units)": "" if self.ph is None else f"{self.ph}",
@@ -85,7 +85,7 @@ class Reading:
             "Nitrite, dissolved (mg/L as N)": "" if self.nitrite is None else f"{self.nitrite}",
             "Orthophosphate, dissolved (mg/L as P)": "" if self.orthophosphate is None else f"{self.orthophosphate}",
             "Conductivity (uS/cm)": "" if self.conductivity is None else f"{self.conductivity}",
-            "Depth to water (ft)": "" if self.depth_to_water is None else f"{self.depth_to_water}",
+            "Depth to water table (m)": "" if self.depth_to_water is None else f"{self.depth_to_water}",
             "EdgeQCFlags": self.edge_qc_flags or "",
         }
 
@@ -110,7 +110,7 @@ def inject_glove_ui_css() -> None:
           }
           [data-testid="stSidebar"] .stTextInput input::placeholder { color: rgba(255, 255, 255, 0.85) !important; }
           [data-testid="stSidebarNav"] a { color: #ffffff !important; }
-          section.main > div { max-width: 860px; padding-top: 1rem; padding-bottom: 2.5rem; }
+          section.main > div { padding-top: 1rem; padding-bottom: 2.5rem; }
           .stButton > button, button[kind="primary"], button[kind="secondary"] {
             min-height: 72px !important; font-size: 1.15rem !important; font-weight: 750 !important;
             border-radius: 18px !important; padding: 14px 18px !important; background: #0b5ed7 !important;
@@ -314,7 +314,8 @@ if not st.session_state.trip_started:
         st.write("Provide your central database Ingest URL. Data will save automatically to cloud if internet is available.")
         st.session_state.ingest_url = st.text_input("Cloud Ingest URL:", value=st.session_state.ingest_url, placeholder="https://api.example.com/ingest")
     
-    with st.expander("2. Load Sites & Coordinates", expanded=True):
+    with st.expander("2. Load Sites & Route Planning", expanded=True):
+        st.write("Upload a CSV file with sites for your trip (Must contain 'SiteID', 'Latitude', and 'Longitude' headers) OR select from pre-existing sites below.")
         uploaded_file = st.file_uploader("Upload Sites CSV", type=["csv"])
         if uploaded_file is not None:
             try:
@@ -328,12 +329,10 @@ if not st.session_state.trip_started:
                 if default_csv.exists() and not st.session_state.preloaded_sites:
                     df = pd.read_csv(default_csv)
                     st.session_state.preloaded_sites = parse_sites_from_dataframe(df)
-                    st.info(f"Loaded {len(st.session_state.preloaded_sites)} sites from default dataset.")
             except Exception: pass
                 
-    with st.expander("3. Route Planning", expanded=True):
         site_options = [s.id for s in st.session_state.preloaded_sites]
-        selected_site_ids = st.multiselect("Choose sites for today:", options=site_options, default=site_options[:3] if len(site_options) >= 3 else site_options)
+        selected_site_ids = st.multiselect("Choose sites for today:", options=site_options, default=[])
         
         st.write("Capture your current GPS location as the starting point:")
         start_location = streamlit_geolocation()
@@ -357,7 +356,7 @@ if not st.session_state.trip_started:
             for i, s in enumerate(st.session_state.ordered_sites):
                 st.write(f"{i+1}. {s.id}")
                 
-    with st.expander("4. Parameter Configuration", expanded=True):
+    with st.expander("3. Parameter Configuration", expanded=True):
         st.write("Select which parameters you will collect on this trip:")
         selected = []
         col_p1, col_p2 = st.columns(2)
@@ -368,13 +367,14 @@ if not st.session_state.trip_started:
         st.session_state.selected_params = selected
         
         st.write("Select Compliance Standard for Real-Time Checking:")
+        standard_opts = list(COMPLIANCE_STANDARDS.keys())
         st.session_state.compliance_standard = st.selectbox(
             "Compliance Standard", 
-            ["None", "Drinking Water (EPA)", "Agricultural (FAO)", "Industrial"],
-            index=["None", "Drinking Water (EPA)", "Agricultural (FAO)", "Industrial"].index(st.session_state.compliance_standard)
+            standard_opts,
+            index=standard_opts.index(st.session_state.compliance_standard) if st.session_state.compliance_standard in standard_opts else 0
         )
         
-    with st.expander("5. SOP Review (Voice SOP)", expanded=False):
+    with st.expander("4. SOP Review (Voice SOP)", expanded=False):
         if "voice_on" not in st.session_state: st.session_state.voice_on = False
         if "voice_transcript" not in st.session_state: st.session_state.voice_transcript = ""
         v1, v2 = st.columns(2)
@@ -405,7 +405,7 @@ else:
         if st.session_state.prompt_early_end:
             pending = [s for s in st.session_state.ordered_sites if s.id not in st.session_state.completed_sites]
             if pending:
-                st.warning(f"⚠️ You still have {len(pending)} unvisited sites in your itinerary. Are you sure you want to end the trip early?")
+                st.warning(f"You still have {len(pending)} unvisited sites in your itinerary. Are you sure you want to end the trip early?")
                 col_ea1, col_ea2 = st.columns(2)
                 with col_ea1:
                     if st.button("Return and Continue Data Collection", use_container_width=True):
@@ -426,7 +426,7 @@ else:
                 st.session_state.pending_end_trip = True
                 st.rerun()
                 
-        st.success(f"✅ Data for **{st.session_state.saved_site}** was successfully saved {'directly to the Cloud' if st.session_state.save_status == 'cloud' else 'offline to your device'}.")
+        st.success(f"Data for **{st.session_state.saved_site}** was successfully saved {'directly to the Cloud' if st.session_state.save_status == 'cloud' else 'offline to your device'}.")
         
         col_sp1, col_sp2, col_sp3 = st.columns(3)
         with col_sp1:
@@ -469,7 +469,11 @@ else:
             all_df = all_df.reindex(columns=SCHEMA_HEADERS)
             csv_data_all = all_df.to_csv(index=False).encode('utf-8')
             
-            temp_pdf = Path("temp_coc.pdf")
+            reports_dir = Path(project_root) / "cloud_analytics" / "reports"
+            reports_dir.mkdir(parents=True, exist_ok=True)
+            report_name = f"past_trip_coc_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            
+            temp_pdf = reports_dir / report_name
             temp_batch = Path(f"batch_temp.csv")
             temp_batch.write_bytes(csv_data_all)
             lta = compute_lta_from_processed(BASELINE_SCHEMA_PATH)
@@ -481,16 +485,15 @@ else:
                 pdf_bytes = b""
                 st.error(f"Failed to generate COC PDF: {e}")
             try:
-                temp_pdf.unlink()
                 temp_batch.unlink()
             except Exception: pass
             
             col_d1, col_d2 = st.columns(2)
             with col_d1:
-                st.download_button(label="📥 Download ALL Today's Data (CSV)", data=csv_data_all, file_name=f"all_trip_data_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv", mime="text/csv", use_container_width=True)
+                st.download_button(label="Download ALL Today's Data (CSV)", data=csv_data_all, file_name=f"all_trip_data_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv", mime="text/csv", use_container_width=True)
             with col_d2:
                 if pdf_bytes:
-                    st.download_button(label="📄 Download COC Report (PDF)", data=pdf_bytes, file_name=f"coc_report_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf", mime="application/pdf", use_container_width=True)
+                    st.download_button(label="Download COC Report (PDF)", data=pdf_bytes, file_name=f"coc_report_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf", mime="application/pdf", use_container_width=True)
         else:
             st.info("No data was collected during this trip.")
             
@@ -644,16 +647,16 @@ else:
                 h_stat, h_msg = evaluate_historical_bounds(val, p_dict_key, monitoring_location_identifier, st.session_state.historical_bounds)
                 
                 badges = []
-                if c_stat == "Pass": badges.append(f"<span style='color: #2e7d32; font-size: 0.85rem;'>✔ Compliance: Pass · {c_msg}</span>")
-                elif c_stat == "Flag": badges.append(f"<span style='color: #ed6c02; font-size: 0.85rem;'>⚠ Compliance: Flag · {c_msg}</span>")
-                elif c_stat == "None": badges.append(f"<span style='color: #6c757d; font-size: 0.85rem;'>− Compliance: No standard</span>")
+                if c_stat == "Pass": badges.append(f"<span style='color: #2e7d32; font-size: 0.85rem;'>Compliance: Pass · {c_msg}</span>")
+                elif c_stat == "Flag": badges.append(f"<span style='color: #ed6c02; font-size: 0.85rem;'>Compliance: Flag · {c_msg}</span>")
+                elif c_stat == "None": badges.append(f"<span style='color: #6c757d; font-size: 0.85rem;'>Compliance: No standard</span>")
                 
-                if h_stat == "Safe": badges.append(f"<span style='color: #2e7d32; font-size: 0.85rem; border: 1px solid #2e7d32; padding: 2px 6px; border-radius: 4px; margin-left: 10px;'>✔ Safe</span>")
+                if h_stat == "Safe": badges.append(f"<span style='color: #2e7d32; font-size: 0.85rem; border: 1px solid #2e7d32; padding: 2px 6px; border-radius: 4px; margin-left: 10px;'>Safe</span>")
                 elif h_stat == "Warning":
-                    badges.append(f"<span style='color: #ed6c02; font-size: 0.85rem; border: 1px solid #ed6c02; padding: 2px 6px; border-radius: 4px; margin-left: 10px;'>⚠ Warning: {h_msg}</span>")
+                    badges.append(f"<span style='color: #ed6c02; font-size: 0.85rem; border: 1px solid #ed6c02; padding: 2px 6px; border-radius: 4px; margin-left: 10px;'>Warning: {h_msg}</span>")
                     all_warnings.append(f"{p_label}: {h_msg}")
                 elif h_stat == "Danger":
-                    badges.append(f"<span style='color: #d32f2f; font-size: 0.85rem; border: 1px solid #d32f2f; padding: 2px 6px; border-radius: 4px; margin-left: 10px;'>❌ Critical: {h_msg}</span>")
+                    badges.append(f"<span style='color: #d32f2f; font-size: 0.85rem; border: 1px solid #d32f2f; padding: 2px 6px; border-radius: 4px; margin-left: 10px;'>Critical: {h_msg}</span>")
                     all_dangers.append(f"{p_label}: {h_msg}")
                     
                 st.markdown(f"<div style='margin-top: -15px; margin-bottom: 15px;'>{''.join(badges)}</div>", unsafe_allow_html=True)
@@ -668,12 +671,12 @@ else:
             elif p == "Nitrite": _render_param("Nitrite, dissolved (mg/L as N)", "nitrite", None, 0.1)
             elif p == "Orthophosphate": _render_param("Orthophosphate, dissolved (mg/L as P)", "orthophosphate", None, 0.1)
             elif p == "Conductivity": _render_param("Conductivity (uS/cm)", "conductivity", float(ocr.get("Conductivity (uS/cm)")) if "Conductivity (uS/cm)" in ocr else None, 1.0)
-            elif p == "Depth to Water": _render_param("Depth to water (ft)", "depth_to_water", None, 0.1)
+            elif p == "Depth to Water": _render_param("Depth to water table (m)", "depth_to_water", None, 0.1)
 
         hard_stops = check_sanity_limits(params_map)
         if hard_stops:
             for hs in hard_stops:
-                st.error(f"⚠ HARD STOP (Sanity Limit): {hs}")
+                st.error(f"HARD STOP (Sanity Limit): {hs}")
 
         has_warnings = len(all_warnings) > 0 or len(all_dangers) > 0
         is_disabled = len(hard_stops) > 0
@@ -688,7 +691,7 @@ else:
                 
         # Level 5: Pre-submission Gatekeeper
         if st.session_state.show_gatekeeper:
-            st.warning("⚠️ QA/QC Warnings detected. Review before submitting:")
+            st.warning("QA/QC Warnings detected. Review before submitting:")
             for w in all_warnings + all_dangers:
                 st.write(f"- {w}")
             col_gk1, col_gk2 = st.columns(2)
