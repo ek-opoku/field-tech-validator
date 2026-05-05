@@ -22,8 +22,9 @@ project_root = str(Path(__file__).resolve().parents[1])
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from utils.geo_helpers import parse_sites_from_dataframe, find_nearest_site, solve_tsp, haversine_distance
+from utils.geo_helpers import parse_sites_from_dataframe, find_nearest_site, solve_tsp, haversine_distance, Site
 from utils.qc_guard import check_sanity_limits, load_historical_bounds, evaluate_historical_bounds, check_compliance, COMPLIANCE_STANDARDS
+from app_theme import apply_water_theme
 
 # Gateway imports for cloud sync
 from gateway_sync.gateway_bridge import is_online, post_batch_json, process_inbox_once, try_sync_once, Config, load_expected_headers, iter_incoming_csv_files
@@ -56,7 +57,7 @@ EDGE_HMAC_ENV = "EDGE_HMAC_SECRET"
 
 @dataclass
 class Reading:
-    activity_start_date: dt.date
+    activity_start_date: dt.datetime
     monitoring_location_identifier: str
     latitude: float | None
     longitude: float | None
@@ -92,133 +93,7 @@ class Reading:
         }
 
 
-def inject_glove_ui_css() -> None:
-    st.markdown(
-        """
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-          .stApp, section.main, section.main > div, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-            background: #ffffff !important;
-          }
-          .stApp, .stApp p, .stApp span, .stApp div, .stApp label, .stMarkdown, .stCaption {
-            color: #111827 !important;
-            font-size: 1.15rem !important;
-          }
-          h1 { color: #0b5ed7 !important; font-size: 2.5rem !important; }
-          h2 { color: #0b5ed7 !important; font-size: 2.0rem !important; }
-          h3 { color: #0b5ed7 !important; font-size: 1.75rem !important; }
-
-          [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 55%, #eef2f7 100%) !important;
-            border-right: 1px solid #e2e8f0 !important;
-            box-shadow: inset -1px 0 0 rgba(15, 23, 42, 0.04) !important;
-            font-family: 'Inter', sans-serif !important;
-          }
-          [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
-            padding: 1.5rem 1rem 2rem 1rem !important;
-          }
-          [data-testid="stSidebar"] label,
-          [data-testid="stSidebar"] .stMarkdown,
-          [data-testid="stSidebar"] .stMarkdown p { color: #475569 !important; }
-          [data-testid="stSidebar"] .stCaption { color: #64748b !important; }
-          [data-testid="stSidebar"] .stTextInput input, [data-testid="stSidebar"] .stNumberInput input, [data-testid="stSidebar"] [data-baseweb="select"] > div, [data-testid="stSidebar"] [data-baseweb="base-input"] > div {
-            background: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important;
-            border-radius: 12px !important; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
-            min-height: 56px !important; font-size: 1.15rem !important;
-          }
-          [data-testid="stSidebar"] [data-baseweb="select"] input,
-          [data-testid="stSidebar"] [data-baseweb="select"] span,
-          [data-testid="stSidebar"] [data-baseweb="select"] svg,
-          [data-testid="stSidebar"] [data-baseweb="radio"] label,
-          [data-testid="stSidebar"] [data-baseweb="checkbox"] label {
-            color: #0f172a !important; fill: #0f172a !important;
-          }
-          [data-testid="stSidebar"] .stTextInput input::placeholder { color: #94a3b8 !important; }
-          [data-testid="stSidebarNav"] {
-            margin: 0 -0.15rem 0.75rem -0.15rem !important;
-            padding: 0.35rem 0 0.85rem 0 !important;
-            border-bottom: 1px solid #e2e8f0 !important;
-          }
-          [data-testid="stSidebarNav"] a {
-            color: #334155 !important; font-weight: 500 !important; font-size: 1.15rem !important;
-            letter-spacing: -0.01em !important;
-            padding: 0.85rem 1rem 0.85rem 0.85rem !important; margin: 0.2rem 0.2rem !important;
-            border-radius: 10px !important; border-left: 3px solid transparent !important;
-          }
-          [data-testid="stSidebarNav"] a:hover {
-            background: #ffffff !important; color: #0b5ed7 !important;
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.07) !important;
-          }
-          [data-testid="stSidebarNav"] a[aria-current="page"] {
-            background: #ffffff !important; color: #0b5ed7 !important; font-weight: 600 !important;
-            border-left-color: #0b5ed7 !important; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08) !important;
-          }
-          [data-testid="stSidebar"] .stButton > button {
-            background: #0b5ed7 !important; color: #ffffff !important; border: 1px solid #0a53be !important;
-            border-radius: 10px !important; font-weight: 600 !important; font-size: 1.15rem !important;
-            min-height: 3.5rem !important; padding: 0.65rem 1rem !important;
-            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
-          }
-          [data-testid="stSidebar"] .stButton > button:hover {
-            background: #0a53be !important; border-color: #0848a4 !important; color: #ffffff !important;
-          }
-          section.main > div { padding-top: 1rem; padding-bottom: 2.5rem; }
-          .stButton > button, button[kind="primary"], button[kind="secondary"] {
-            min-height: 80px !important; font-size: 1.35rem !important; font-weight: 750 !important;
-            border-radius: 20px !important; padding: 18px 24px !important; background: #0b5ed7 !important;
-            color: #ffffff !important; border: 1px solid #0a53be !important;
-          }
-          .stButton > button:hover, button[kind="primary"]:hover, button[kind="secondary"]:hover {
-            background: #0a53be !important; border-color: #0848a4 !important;
-          }
-          div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] > div {
-            min-height: 64px !important; border-radius: 16px !important; font-size: 1.25rem !important;
-            background-color: #ffffff !important; color: #111827 !important; padding: 0.5rem 1rem !important;
-          }
-          [data-baseweb="popover"] [role="listbox"],
-          [data-baseweb="popover"] [role="option"],
-          [data-baseweb="menu"] li,
-          [data-baseweb="menu"] li * {
-            background: #ffffff !important;
-            color: #111827 !important;
-          }
-          [data-testid="stExpander"] { background-color: #ffffff !important; border-radius: 12px; }
-          [data-testid="stExpander"] details { background-color: #ffffff !important; border-radius: 12px; }
-          [data-testid="stExpander"] summary { background-color: #f3f4f6 !important; color: #111827 !important; border-radius: 12px; }
-          [data-testid="stExpander"] summary p { color: #111827 !important; font-weight: 700 !important; font-size: 1.25rem !important; }
-          label { font-size: 1.25rem !important; font-weight: 600 !important; }
-          [data-baseweb="radio"] label, [data-baseweb="checkbox"] label {
-            font-size: 1.2rem !important; padding-top: 0.75rem !important; padding-bottom: 0.75rem !important;
-          }
-          .qc-popup {
-            position: sticky; top: 0; z-index: 9999; margin: 0.5rem 0 1rem 0; padding: 16px 16px;
-            border-radius: 18px; border: 2px solid rgba(255, 255, 255, 0.25); background: #b00020;
-            color: white; font-weight: 850; font-size: 1.08rem; box-shadow: 0 16px 40px rgba(176, 0, 32, 0.38);
-          }
-          @media (max-width: 640px) { .stButton > button { min-height: 90px !important; font-size: 1.45rem !important; } }
-          
-          /* Metric Bubbles - Visually Neat */
-          [data-testid="stMetric"] {
-            background-color: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 16px !important;
-            padding: 1.25rem !important;
-            box-shadow: 0 4px 6px rgba(15, 23, 42, 0.05), 0 10px 15px rgba(15, 23, 42, 0.03) !important;
-            text-align: center !important;
-            transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-          }
-          [data-testid="stMetric"]:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 12px rgba(15, 23, 42, 0.08), 0 12px 20px rgba(15, 23, 42, 0.05) !important;
-          }
-          [data-testid="stMetricValue"] {
-            color: #0b5ed7 !important;
-            font-weight: 700 !important;
-          }
-        </style>
-        """, unsafe_allow_html=True
-    )
 
 
 def try_ocr_text_from_image(image_bytes: bytes) -> tuple[str | None, str | None]:
@@ -363,7 +238,7 @@ def qc_warnings(*, ph: float | None, temperature_c: float | None, turbidity_ntu:
 # ---------------- APP LOGIC ----------------
 
 st.set_page_config(page_title="Field Data Collection", layout="centered", initial_sidebar_state="collapsed")
-inject_glove_ui_css()
+apply_water_theme()
 
 # Session State Initialization
 if "trip_started" not in st.session_state: st.session_state.trip_started = False
@@ -398,11 +273,10 @@ if not st.session_state.trip_started:
     st.header("Phase 1: Field Trip Prep")
     st.caption("Plan your route, configure parameters, and prepare for the field.")
     
-    with st.expander("1. Cloud Sync Settings", expanded=True):
-        st.write("Provide your central database Ingest URL. Data will save automatically to cloud if internet is available.")
-        st.session_state.ingest_url = st.text_input("Cloud Ingest URL:", value=st.session_state.ingest_url, placeholder="https://api.example.com/ingest")
+    tab_route, tab_params, tab_sop = st.tabs(["📍 Route & Sites", "⚙️ Parameters & Settings", "📝 Instructions"])
     
-    with st.expander("2. Load Sites & Route Planning", expanded=True):
+    with tab_route:
+        st.subheader("Load Sites & Plan Route")
         st.write("Upload a CSV file with sites for your trip (Must contain 'SiteID', 'Latitude', and 'Longitude' headers) OR select from pre-existing sites below.")
         uploaded_file = st.file_uploader("Upload Sites CSV", type=["csv"])
         if uploaded_file is not None:
@@ -413,7 +287,7 @@ if not st.session_state.trip_started:
             except Exception as e: st.error(f"Error loading CSV: {e}")
         else:
             try:
-                default_csv = Path(project_root) / "data_wide.csv"
+                default_csv = Path(project_root) / "data_wide_imputed.csv.gz"
                 if default_csv.exists() and not st.session_state.preloaded_sites:
                     df = pd.read_csv(default_csv)
                     st.session_state.preloaded_sites = parse_sites_from_dataframe(df)
@@ -421,6 +295,25 @@ if not st.session_state.trip_started:
                 
         site_options = [s.id for s in st.session_state.preloaded_sites]
         selected_site_ids = st.multiselect("Choose sites for today:", options=site_options, default=[])
+        
+        st.write("**Or manually add a new site for this trip:**")
+        col_c1, col_c2, col_c3 = st.columns([2, 1, 1])
+        with col_c1:
+            custom_id = st.text_input("New Site ID", placeholder="e.g. WELL-999")
+        with col_c2:
+            custom_lat = st.number_input("Lat (optional)", format="%.6f", value=None, key="c_lat")
+        with col_c3:
+            custom_lon = st.number_input("Lon (optional)", format="%.6f", value=None, key="c_lon")
+            
+        if st.button("Add Custom Site"):
+            if custom_id:
+                if custom_id not in [s.id for s in st.session_state.preloaded_sites]:
+                    st.session_state.preloaded_sites.append(Site(id=custom_id, lat=custom_lat if custom_lat else 0.0, lon=custom_lon if custom_lon else 0.0))
+                    st.success(f"Added '{custom_id}'! You can now select it above.")
+                else:
+                    st.warning(f"Site '{custom_id}' already exists.")
+            else:
+                st.error("Please provide a Site ID to add.")
         
         st.write("Capture your current GPS location as the starting point:")
         start_location = streamlit_geolocation()
@@ -440,11 +333,10 @@ if not st.session_state.trip_started:
                 st.error("Select at least one site.")
                 
         if st.session_state.ordered_sites:
-            st.write("Optimized Itinerary:")
-            for i, s in enumerate(st.session_state.ordered_sites):
-                st.write(f"{i+1}. {s.id}")
+            st.info(f"📍 Route optimized for {len(st.session_state.ordered_sites)} sites. Ready to begin trip.")
                 
-    with st.expander("3. Parameter Configuration", expanded=True):
+    with tab_params:
+        st.subheader("Parameter Configuration")
         st.write("Select which parameters you will collect on this trip:")
         selected = []
         col_p1, col_p2 = st.columns(2)
@@ -454,15 +346,20 @@ if not st.session_state.trip_started:
                 selected.append(p)
         st.session_state.selected_params = selected
         
-        st.write("Select Compliance Standard for Real-Time Checking:")
-        standard_opts = list(COMPLIANCE_STANDARDS.keys())
-        st.session_state.compliance_standard = st.selectbox(
-            "Compliance Standard", 
-            standard_opts,
-            index=standard_opts.index(st.session_state.compliance_standard) if st.session_state.compliance_standard in standard_opts else 0
-        )
+        with st.expander("Advanced Configuration", expanded=False):
+            st.write("Provide your central database Ingest URL. Data will save automatically to cloud if internet is available.")
+            st.session_state.ingest_url = st.text_input("Cloud Ingest URL:", value=st.session_state.ingest_url, placeholder="https://api.example.com/ingest")
+            
+            st.write("Select Compliance Standard for Real-Time Checking:")
+            standard_opts = list(COMPLIANCE_STANDARDS.keys())
+            st.session_state.compliance_standard = st.selectbox(
+                "Compliance Standard", 
+                standard_opts,
+                index=standard_opts.index(st.session_state.compliance_standard) if st.session_state.compliance_standard in standard_opts else 0
+            )
         
-    with st.expander("4. SOP Review (Voice SOP)", expanded=False):
+    with tab_sop:
+        st.subheader("SOP Review (Voice SOP)")
         if "voice_on" not in st.session_state: st.session_state.voice_on = False
         if "voice_transcript" not in st.session_state: st.session_state.voice_transcript = ""
         v1, v2 = st.columns(2)
@@ -668,17 +565,24 @@ else:
         st.subheader("Data Collection Form")
         
         all_site_ids = [s.id for s in st.session_state.preloaded_sites]
-        default_idx = all_site_ids.index(recommended_site.id) if recommended_site and recommended_site.id in all_site_ids else 0
-            
-        col_a, col_b = st.columns([1, 1])
-        with col_a:
-            activity_start_date = st.date_input("Activity Date", value=dt.date.today())
-        with col_b:
-            monitoring_location_identifier = st.selectbox(
-                "MonitoringLocationIdentifier", 
-                options=["(New Site)"] + all_site_ids, 
-                index=default_idx + 1 if recommended_site else 0
-            ) if all_site_ids else st.text_input("MonitoringLocationIdentifier", placeholder="e.g., WELL-102A")
+        
+        if "site_select_key" not in st.session_state:
+            st.session_state.site_select_key = recommended_site.id if recommended_site and recommended_site.id in all_site_ids else None
+
+        # Render a custom clear button above the selectbox if something is selected
+        if st.session_state.site_select_key is not None:
+            if st.button("❌ Clear Selection", key="clear_site"):
+                st.session_state.site_select_key = None
+                st.rerun()
+                
+        options_list = ["(New Site)"] + all_site_ids
+        monitoring_location_identifier = st.selectbox(
+            "MonitoringLocationIdentifier", 
+            options=options_list, 
+            index=options_list.index(st.session_state.site_select_key) if st.session_state.site_select_key in options_list else None,
+            key="site_select_key",
+            placeholder="Search or select a site..."
+        ) if all_site_ids else st.text_input("MonitoringLocationIdentifier", placeholder="e.g., WELL-102A")
             
         if monitoring_location_identifier and monitoring_location_identifier in all_site_ids:
             site_dict = {s.id: s for s in st.session_state.preloaded_sites}
@@ -686,21 +590,35 @@ else:
             nav_url = f"https://www.google.com/maps/dir/?api=1&destination={selected_site.lat},{selected_site.lon}"
             st.markdown(f"<a href='{nav_url}' target='_blank'><button style='width: 100%; min-height: 50px; border-radius: 12px; background-color: #28a745; color: white; font-weight: bold; font-size: 1.1rem; border: none; margin-bottom: 1rem;'>🗺️ Navigate to {monitoring_location_identifier}</button></a>", unsafe_allow_html=True)
 
-                
         if monitoring_location_identifier == "(New Site)":
-            monitoring_location_identifier = st.text_input("Enter New Site ID:")
-            
-        col_lat, col_lon = st.columns([1, 1])
-        with col_lat: latitude = st.number_input("Latitude", value=float(current_lat) if current_lat else None, format="%.6f")
-        with col_lon: longitude = st.number_input("Longitude", value=float(current_lon) if current_lon else None, format="%.6f")
-
+            monitoring_location_identifier = st.text_input("Enter New Site ID:", placeholder="e.g. WELL-102B")
+            if not monitoring_location_identifier:
+                st.info("Please manually input a new site ID. GPS coordinates have been grabbed from your device automatically.")
+                
         if current_lat and current_lon and monitoring_location_identifier and monitoring_location_identifier != "(New Site)":
             site_dict = {s.id: s for s in st.session_state.preloaded_sites}
             if monitoring_location_identifier in site_dict:
                 target_site = site_dict[monitoring_location_identifier]
                 dist = haversine_distance(current_lat, current_lon, target_site.lat, target_site.lon)
-                if dist > 0.5: st.warning(f"GPS Verification: You are {dist:.2f} miles away from {target_site.id}. Please verify.")
-                else: st.success(f"GPS Verification: You are at {target_site.id}.")
+                if dist > 0.5:
+                    st.error(f"**🚨 GPS VERIFICATION FAILED:** You are {dist:.2f} miles away from {target_site.id}. Please verify you are at the correct location!")
+                else: 
+                    st.success(f"**✅ GPS Verified:** You are physically at {target_site.id}.")
+                    
+        with st.expander("View/Edit Metadata & GPS", expanded=False):
+            activity_start_date = st.date_input("Activity Date (Auto-Captured on Save)", value=dt.date.today(), disabled=True)
+            default_lat, default_lon = float(current_lat) if current_lat else None, float(current_lon) if current_lon else None
+            
+            # If pre-existing site and no GPS, fallback to site's known coordinates
+            if monitoring_location_identifier and monitoring_location_identifier in all_site_ids:
+                site_dict = {s.id: s for s in st.session_state.preloaded_sites}
+                selected_site = site_dict[monitoring_location_identifier]
+                if default_lat is None: default_lat = selected_site.lat
+                if default_lon is None: default_lon = selected_site.lon
+
+            col_lat, col_lon = st.columns([1, 1])
+            with col_lat: latitude = st.number_input("Latitude", value=default_lat, format="%.6f")
+            with col_lon: longitude = st.number_input("Longitude", value=default_lon, format="%.6f")
 
         if "camera_on" not in st.session_state: st.session_state.camera_on = False
         col_cam_a, col_cam_b = st.columns(2)
@@ -716,6 +634,10 @@ else:
                 else:
                     st.text_area("OCR text", value=ocr_text, height=100)
                     st.session_state.ocr_suggestions = parse_meter_ocr(ocr_text)
+                    if st.button("✨ Apply OCR Values", use_container_width=True, type="primary"):
+                        st.success("OCR Loaded into Inputs!")
+                        st.session_state.camera_on = False
+                        st.rerun()
 
         ocr = st.session_state.get("ocr_suggestions", {}) or {}
 
@@ -749,29 +671,58 @@ else:
                     
                 st.markdown(f"<div style='margin-top: -15px; margin-bottom: 15px;'>{''.join(badges)}</div>", unsafe_allow_html=True)
                 
-        for p in st.session_state.selected_params:
-            if p == "pH": _render_param("pH (standard units)", "ph", float(ocr.get("pH (standard units)")) if "pH (standard units)" in ocr else None, 0.01)
-            elif p == "Temperature": _render_param("Temperature, water (deg C)", "temperature_c", float(ocr.get("Temperature, water (deg C)")) if "Temperature, water (deg C)" in ocr else None, 0.1)
-            elif p == "Turbidity": _render_param("Turbidity (NTU)", "turbidity_ntu", float(ocr.get("Turbidity (NTU)")) if "Turbidity (NTU)" in ocr else None, 0.1)
-            elif p == "DO (Dissolved Oxygen)": _render_param("Oxygen, dissolved (mg/L)", "dissolved_oxygen_mg_l", float(ocr.get("Oxygen, dissolved (mg/L)")) if "Oxygen, dissolved (mg/L)" in ocr else None, 0.1)
-            elif p == "DOsat (DO Saturation)": _render_param("Oxygen, dissolved (% saturation)", "dissolved_oxygen_sat", float(ocr.get("Oxygen, dissolved (% saturation)")) if "Oxygen, dissolved (% saturation)" in ocr else None, 0.1)
-            elif p == "Nitrate": _render_param("Nitrate, dissolved (mg/L as N)", "nitrate", None, 0.1)
-            elif p == "Nitrite": _render_param("Nitrite, dissolved (mg/L as N)", "nitrite", None, 0.1)
-            elif p == "Orthophosphate": _render_param("Orthophosphate, dissolved (mg/L as P)", "orthophosphate", None, 0.1)
-            elif p == "Conductivity": _render_param("Conductivity (uS/cm)", "conductivity", float(ocr.get("Conductivity (uS/cm)")) if "Conductivity (uS/cm)" in ocr else None, 1.0)
-            elif p == "Depth to Water": _render_param("Depth to water table (m)", "depth_to_water", None, 0.1)
+        tab_phys, tab_chem, tab_nutr = st.tabs(["🌡️ Physical", "🧪 Chemical", "🌱 Nutrients"])
+        
+        with tab_phys:
+            for p in st.session_state.selected_params:
+                if p == "Temperature": _render_param("Temperature, water (deg C)", "temperature_c", float(ocr.get("Temperature, water (deg C)")) if "Temperature, water (deg C)" in ocr else None, 0.1)
+                elif p == "Turbidity": _render_param("Turbidity (NTU)", "turbidity_ntu", float(ocr.get("Turbidity (NTU)")) if "Turbidity (NTU)" in ocr else None, 0.1)
+                elif p == "Depth to Water": _render_param("Depth to water table (m)", "depth_to_water", None, 0.1)
+                
+        with tab_chem:
+            for p in st.session_state.selected_params:
+                if p == "pH": _render_param("pH (standard units)", "ph", float(ocr.get("pH (standard units)")) if "pH (standard units)" in ocr else None, 0.01)
+                elif p == "DO (Dissolved Oxygen)": _render_param("Oxygen, dissolved (mg/L)", "dissolved_oxygen_mg_l", float(ocr.get("Oxygen, dissolved (mg/L)")) if "Oxygen, dissolved (mg/L)" in ocr else None, 0.1)
+                elif p == "DOsat (DO Saturation)": _render_param("Oxygen, dissolved (% saturation)", "dissolved_oxygen_sat", float(ocr.get("Oxygen, dissolved (% saturation)")) if "Oxygen, dissolved (% saturation)" in ocr else None, 0.1)
+                elif p == "Conductivity": _render_param("Conductivity (uS/cm)", "conductivity", float(ocr.get("Conductivity (uS/cm)")) if "Conductivity (uS/cm)" in ocr else None, 1.0)
+                
+        with tab_nutr:
+            for p in st.session_state.selected_params:
+                if p == "Nitrate": _render_param("Nitrate, dissolved (mg/L as N)", "nitrate", None, 0.1)
+                elif p == "Nitrite": _render_param("Nitrite, dissolved (mg/L as N)", "nitrite", None, 0.1)
+                elif p == "Orthophosphate": _render_param("Orthophosphate, dissolved (mg/L as P)", "orthophosphate", None, 0.1)
+
+        st.markdown("""
+        <style>
+        @keyframes flash {
+            0% { background-color: #ffebee; border-left: 5px solid #d32f2f; }
+            50% { background-color: #ffcdd2; border-left: 5px solid #b71c1c; }
+            100% { background-color: #ffebee; border-left: 5px solid #d32f2f; }
+        }
+        .flashing-error {
+            animation: flash 1s infinite;
+            padding: 10px;
+            border-radius: 4px;
+            color: #b71c1c;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
         hard_stops = check_sanity_limits(params_map)
         if hard_stops:
             for hs in hard_stops:
-                st.error(f"HARD STOP (Sanity Limit): {hs}")
+                st.markdown(f"<div class='flashing-error'>🚨 PHYSICAL BOUNDS VIOLATED: {hs}</div>", unsafe_allow_html=True)
 
         has_warnings = len(all_warnings) > 0 or len(all_dangers) > 0
         is_disabled = len(hard_stops) > 0
         
         # Level 4: Haptic Feedback
-        if has_warnings:
-            import streamlit.components.v1 as components
+        import streamlit.components.v1 as components
+        if is_disabled:
+            components.html("<script>if(navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);</script>", height=0)
+        elif has_warnings:
             if len(all_dangers) > 0:
                 components.html("<script>if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);</script>", height=0)
             else:
@@ -794,63 +745,58 @@ else:
                     st.rerun()
             st.stop()
 
-        col_save1, col_save2 = st.columns(2)
-        with col_save1:
-            if st.button("Apply OCR values", use_container_width=True): st.success("OCR loaded.")
-        with col_save2:
-            if is_disabled:
-                st.button("Save Data (Disabled)", type="primary", use_container_width=True, disabled=True)
-            elif has_warnings and not st.session_state.gatekeeper_override:
-                if st.button("Review Warnings (Save Data)", type="primary", use_container_width=True):
-                    st.session_state.show_gatekeeper = True
-                    st.rerun()
-            else:
-                if st.button("Save Data (Overridden)" if st.session_state.gatekeeper_override else "Save Data", type="primary", use_container_width=True):
-                    if not monitoring_location_identifier or not monitoring_location_identifier.strip():
-                        st.error("Site ID required.")
+        if is_disabled:
+            st.button("Save Data (Disabled)", type="primary", use_container_width=True, disabled=True)
+        elif has_warnings and not st.session_state.gatekeeper_override:
+            if st.button("Review Warnings (Save Data)", type="primary", use_container_width=True):
+                st.session_state.show_gatekeeper = True
+                st.rerun()
+        else:
+            if st.button("Save Data (Overridden)" if st.session_state.gatekeeper_override else "Save Data", type="primary", use_container_width=True):
+                if not monitoring_location_identifier or not monitoring_location_identifier.strip() or monitoring_location_identifier == "(New Site)":
+                    st.error("Valid Site ID required.")
+                else:
+                    reading = Reading(
+                        activity_start_date=dt.datetime.now(),
+                        monitoring_location_identifier=monitoring_location_identifier,
+                        latitude=latitude,
+                        longitude=longitude,
+                        temperature_c=params_map.get("temperature_c"),
+                        turbidity_ntu=params_map.get("turbidity_ntu"),
+                        ph=params_map.get("ph"),
+                        dissolved_oxygen_mg_l=params_map.get("dissolved_oxygen_mg_l"),
+                        dissolved_oxygen_sat=params_map.get("dissolved_oxygen_sat"),
+                        nitrate=params_map.get("nitrate"),
+                        nitrite=params_map.get("nitrite"),
+                        orthophosphate=params_map.get("orthophosphate"),
+                        conductivity=params_map.get("conductivity"),
+                        depth_to_water=params_map.get("depth_to_water"),
+                        edge_qc_flags="|".join(all_warnings + all_dangers) if st.session_state.gatekeeper_override else ""
+                    )
+                    st.session_state.gatekeeper_override = False
+                    row_data = reading.to_row()
+                    saved = False
+                    
+                    if st.session_state.ingest_url:
+                        with st.spinner("Attempting to save directly to Cloud..."):
+                            if is_online(st.session_state.ingest_url, timeout_seconds=3.0):
+                                try:
+                                    post_batch_json(st.session_state.ingest_url, [row_data])
+                                    st.success("✅ Saved directly to Cloud!")
+                                    saved = True
+                                except Exception as e:
+                                    st.error(f"Cloud push failed: {e}. Falling back to offline save.")
+                    
+                    if not saved:
+                        out_path = append_to_inbox(reading)
+                        st.session_state.save_status = "offline"
                     else:
-                        reading = Reading(
-                            activity_start_date=activity_start_date,
-                            monitoring_location_identifier=monitoring_location_identifier,
-                            latitude=latitude,
-                            longitude=longitude,
-                            temperature_c=params_map.get("temperature_c"),
-                            turbidity_ntu=params_map.get("turbidity_ntu"),
-                            ph=params_map.get("ph"),
-                            dissolved_oxygen_mg_l=params_map.get("dissolved_oxygen_mg_l"),
-                            dissolved_oxygen_sat=params_map.get("dissolved_oxygen_sat"),
-                            nitrate=params_map.get("nitrate"),
-                            nitrite=params_map.get("nitrite"),
-                            orthophosphate=params_map.get("orthophosphate"),
-                            conductivity=params_map.get("conductivity"),
-                            depth_to_water=params_map.get("depth_to_water"),
-                            edge_qc_flags="|".join(all_warnings + all_dangers) if st.session_state.gatekeeper_override else ""
-                        )
-                        st.session_state.gatekeeper_override = False
+                        st.session_state.save_status = "cloud"
+                    
+                    if monitoring_location_identifier not in st.session_state.completed_sites:
+                        st.session_state.completed_sites.append(monitoring_location_identifier)
                         
-                        row_data = reading.to_row()
-                        saved = False
-                        
-                        if st.session_state.ingest_url:
-                            with st.spinner("Attempting to save directly to Cloud..."):
-                                if is_online(st.session_state.ingest_url, timeout_seconds=3.0):
-                                    try:
-                                        post_batch_json(st.session_state.ingest_url, [row_data])
-                                        st.success("✅ Saved directly to Cloud!")
-                                        saved = True
-                                    except Exception as e:
-                                        st.error(f"Cloud push failed: {e}. Falling back to offline save.")
-                        
-                        if not saved:
-                            out_path = append_to_inbox(reading)
-                            st.session_state.save_status = "offline"
-                        else:
-                            st.session_state.save_status = "cloud"
-                        
-                        if monitoring_location_identifier not in st.session_state.completed_sites:
-                            st.session_state.completed_sites.append(monitoring_location_identifier)
-                            
-                        st.session_state.trip_data.append(row_data)
-                        st.session_state.saved_site = monitoring_location_identifier
-                        st.rerun()
+                    st.session_state.trip_data.append(row_data)
+                    st.session_state.saved_site = monitoring_location_identifier
+                    st.rerun()
 

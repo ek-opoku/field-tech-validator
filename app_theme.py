@@ -17,8 +17,10 @@ def apply_water_theme() -> None:
           }
 
           /* Safely apply font to text elements without overriding icons */
-          html, body, [class*="css"], p, a, h1, h2, h3, h4, h5, h6, label, li, span, div {
-            font-family: 'Inter', sans-serif !important;
+          .stApp {
+            font-family: 'Inter', sans-serif;
+          }
+          html, body, p, a, h1, h2, h3, h4, h5, h6, label, li {
             font-size: 1.15rem;
           }
 
@@ -238,6 +240,10 @@ def apply_water_theme() -> None:
           [data-baseweb="select"] [role="option"] * {
             color: #0f172a !important;
           }
+          [data-baseweb="select"] input {
+            color: #0f172a !important;
+            -webkit-text-fill-color: #0f172a !important;
+          }
 
           /* Prevent font override for material icons */
           span.material-symbols-rounded, 
@@ -265,6 +271,14 @@ def apply_water_theme() -> None:
             color: #0b5ed7 !important;
             font-weight: 700 !important;
           }
+
+          /* Field App Specifics */
+          .qc-popup {
+            position: sticky; top: 0; z-index: 9999; margin: 0.5rem 0 1rem 0; padding: 16px 16px;
+            border-radius: 18px; border: 2px solid rgba(255, 255, 255, 0.25); background: #b00020;
+            color: white; font-weight: 850; font-size: 1.08rem; box-shadow: 0 16px 40px rgba(176, 0, 32, 0.38);
+          }
+          @media (max-width: 640px) { .stButton > button { min-height: 90px !important; font-size: 1.45rem !important; } }
         </style>
         """,
         unsafe_allow_html=True,

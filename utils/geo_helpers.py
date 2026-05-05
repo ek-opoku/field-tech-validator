@@ -1,4 +1,6 @@
 import math
+import json
+import urllib.request
 import pandas as pd
 from typing import List, Dict, Tuple
 from dataclasses import dataclass
@@ -104,6 +106,29 @@ def parse_sites_from_dataframe(df: pd.DataFrame) -> List[Site]:
     return sites
 
 
+def get_osrm_distance_matrix(nodes: List[Site]) -> List[List[int]]:
+    """Fetches real driving distance matrix from OSRM public API."""
+    if len(nodes) > 100:
+        return None  # OSRM public API typically limits to ~100 coordinates
+    
+    coords = ";".join([f"{n.lon},{n.lat}" for n in nodes])
+    url = f"http://router.project-osrm.org/table/v1/driving/{coords}?annotations=distance"
+    
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "FieldTechValidator/1.0"})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            data = json.loads(response.read().decode())
+            if data.get("code") == "Ok":
+                distances = data.get("distances", [])
+                # OSRM returns distances in meters. OR-Tools requires integers.
+                int_matrix = []
+                for row in distances:
+                    int_matrix.append([int(d) for d in row])
+                return int_matrix
+    except Exception as e:
+        print(f"OSRM fallback triggered: {e}")
+    return None
+
 def solve_tsp(sites: List[Site], start_lat: float, start_lon: float) -> List[Site]:
     """
     Solves the Traveling Salesperson Problem for the given sites starting from the given coordinates.
@@ -115,18 +140,26 @@ def solve_tsp(sites: List[Site], start_lat: float, start_lon: float) -> List[Sit
     # Insert the start location as node 0
     all_nodes = [Site(id="Start", lat=start_lat, lon=start_lon)] + sites
 
-    # Create distance matrix (using integers as required by OR-Tools, e.g., distance in feet or scaled miles)
-    # Scale by 1000 to keep precision
-    distance_matrix = []
+    # Attempt to get real road distances from OSRM
+    distance_matrix = get_osrm_distance_matrix(all_nodes)
+    
+    if distance_matrix is None:
+        # Fallback: Create straight-line distance matrix (scaled by 1000 for int precision)
+        distance_matrix = []
+        for i in range(len(all_nodes)):
+            row = []
+            for j in range(len(all_nodes)):
+                if i == j:
+                    row.append(0)
+                else:
+                    dist = haversine_distance(all_nodes[i].lat, all_nodes[i].lon, all_nodes[j].lat, all_nodes[j].lon)
+                    row.append(int(dist * 1000))
+            distance_matrix.append(row)
+
+    # Implement Open-Ended TSP (No return to start)
+    # The cost to return from ANY node to the Start node (0) is forced to 0.
     for i in range(len(all_nodes)):
-        row = []
-        for j in range(len(all_nodes)):
-            if i == j:
-                row.append(0)
-            else:
-                dist = haversine_distance(all_nodes[i].lat, all_nodes[i].lon, all_nodes[j].lat, all_nodes[j].lon)
-                row.append(int(dist * 1000))
-        distance_matrix.append(row)
+        distance_matrix[i][0] = 0
 
     manager = pywrapcp.RoutingIndexManager(len(distance_matrix), 1, 0)
     routing = pywrapcp.RoutingModel(manager)
@@ -141,6 +174,8 @@ def solve_tsp(sites: List[Site], start_lat: float, start_lon: float) -> List[Sit
 
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
     search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+    search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+    search_parameters.time_limit.seconds = 2
 
     solution = routing.SolveWithParameters(search_parameters)
 

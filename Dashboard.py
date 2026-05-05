@@ -7,7 +7,7 @@ from app_theme import apply_water_theme
 st.set_page_config(page_title="Dashboard", layout="wide")
 apply_water_theme()
 
-@st.cache_data
+@st.cache_data(show_spinner="Loading data...")
 def load_data():
     file_path = "data_wide_imputed.csv.gz"
     if os.path.exists(file_path):
@@ -168,13 +168,13 @@ with tab1:
                         val = trip_df[c].mean()
                         label, value_s = executive_metric_label_value(c, val)
                         rows[i // 5][i % 5].metric(label, value_s)
+    else:
+        st.info("💤 No active field trips currently ongoing.")
                     
-        st.divider()
+    st.divider()
 
     st.subheader('Overall Database Metrics')
-    c1, c2 = st.columns(2)
-    c1.metric("Total samples (records)", f"{len(df):,}")
-    c2.metric("Active monitoring wells (count)", f"{df['SiteID'].nunique():,}")
+    st.metric("Active monitoring wells (count)", f"{df['SiteID'].nunique():,}")
     
     st.write("**Global averages (mean)**")
     all_params = [
@@ -284,7 +284,25 @@ with tab3:
     # 1. Filters
     # Site Filter
     all_sites = sorted(df["SiteID"].dropna().unique().tolist())
-    selected_sites = st.multiselect("Select Monitoring Sites (leave empty for global average):", options=all_sites, default=[])
+    
+    if "ts_selected_sites" not in st.session_state:
+        st.session_state.ts_selected_sites = []
+
+    def clear_ts_selection():
+        st.session_state.ts_selected_sites = []
+
+    ms_col, clr_col = st.columns([4, 1])
+    with ms_col:
+        selected_sites = st.multiselect(
+            "Select Monitoring Sites (leave empty for global average):", 
+            options=all_sites, 
+            key="ts_selected_sites",
+            placeholder="Search and select sites..."
+        )
+    with clr_col:
+        st.write("") # Vertical spacing
+        st.write("") 
+        st.button("❌ Clear Selection", key="clear_ts_btn", use_container_width=True, on_click=clear_ts_selection)
 
     filter_col1, filter_col2, filter_col3 = st.columns(3)
     

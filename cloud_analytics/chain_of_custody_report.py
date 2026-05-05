@@ -270,15 +270,83 @@ def render_coc_pdf(
     locations = sorted({(r.get("SiteID") or "").strip() for r in rows if (r.get("SiteID") or "").strip()})
     loc_summary = ", ".join(locations[:15]) + ("…" if len(locations) > 15 else "")
 
+    parsed_dates = []
+    for r in rows:
+        d_str = r.get("Date", "")
+        if d_str:
+            try:
+                parsed_dates.append(dt.datetime.fromisoformat(d_str))
+            except Exception:
+                pass
+    
+    trip_start = min(parsed_dates).strftime("%Y-%m-%d %H:%M:%S") if parsed_dates else "Unknown"
+    trip_end = max(parsed_dates).strftime("%Y-%m-%d %H:%M:%S") if parsed_dates else "Unknown"
+
+    numeric_headers = [
+        "Temperature, water (deg C)",
+        "Turbidity (NTU)",
+        "pH (standard units)",
+        "Oxygen, dissolved (mg/L)",
+        "Oxygen, dissolved (% saturation)",
+        "Nitrate, dissolved (mg/L as N)",
+        "Nitrite, dissolved (mg/L as N)",
+        "Orthophosphate, dissolved (mg/L as P)",
+        "Conductivity (uS/cm)",
+        "Depth to water table (m)",
+    ]
+
+    param_stats = []
+    for h in numeric_headers:
+        vals = []
+        for r in rows:
+            try:
+                v = float(r.get(h, ""))
+                vals.append(v)
+            except Exception:
+                pass
+        if vals:
+            param_stats.append([
+                h.split(" (")[0],
+                f"{min(vals):.2f}",
+                f"{max(vals):.2f}",
+                f"{sum(vals)/len(vals):.2f}"
+            ])
+
     story = []
     story.append(Paragraph("Chain of Custody Report", title))
     story.append(Paragraph(f"Generated: <b>{now}</b>", body))
     story.append(Paragraph(f"Report ID: <b>{report_id}</b>", body))
     story.append(Paragraph(f"Batch file: <b>{batch_path.name}</b>", body))
     story.append(Paragraph(f"Batch SHA256: <b>{batch_hash}</b>", body))
-    story.append(Paragraph(f"Rows: <b>{len(rows)}</b>", body))
+    story.append(Paragraph(f"Trip Start: <b>{trip_start}</b>", body))
+    story.append(Paragraph(f"Trip End: <b>{trip_end}</b>", body))
+    story.append(Paragraph(f"Sites Visited: <b>{len(locations)}</b>", body))
+    story.append(Paragraph(f"Total Samples (Rows): <b>{len(rows)}</b>", body))
     story.append(Paragraph(f"Locations: <b>{loc_summary or '—'}</b>", body))
     story.append(Spacer(1, 0.18 * inch))
+
+    if param_stats:
+        story.append(Paragraph("Parameter Summary", h2))
+        stat_tbl_data = [["Parameter", "Min", "Max", "Average"]] + param_stats
+        stat_tbl = Table(stat_tbl_data, colWidths=[3.0 * inch, 1.0 * inch, 1.0 * inch, 1.0 * inch])
+        stat_tbl.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F2F4F7")),
+                    ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#101828")),
+                    ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#D0D5DD")),
+                    ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 9),
+                    ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FCFCFD")]),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                    ("TOPPADDING", (0, 0), (-1, -1), 4),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ]
+            )
+        )
+        story.append(stat_tbl)
+        story.append(Spacer(1, 0.18 * inch))
 
     story.append(Paragraph("QA/QC red flags", h2))
     for f in flags:
