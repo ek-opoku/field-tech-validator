@@ -1,6 +1,7 @@
 import csv
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
+import gzip
 
 # =====================================================================
 # LEVEL 1: Sanity Limits (Hard Bounds)
@@ -58,7 +59,12 @@ def load_historical_bounds(schema_csv_path: Path) -> Dict[str, Dict[str, Dict[st
     
     well_data: Dict[str, Dict[str, List[float]]] = {}
     
-    with schema_csv_path.open("r", newline="", encoding="utf-8") as f:
+    if schema_csv_path.suffix.lower() == '.gz':
+        f = gzip.open(schema_csv_path, "rt", encoding="utf-8", newline="")
+    else:
+        f = schema_csv_path.open("r", newline="", encoding="utf-8")
+        
+    with f:
         reader = csv.DictReader(f)
         if not reader.fieldnames: 
             return {}

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import gzip
+
 import csv
 import datetime as dt
 import hashlib
@@ -261,7 +263,13 @@ def load_long_term_averages(schema_csv_path: Path) -> dict[str, float]:
     numeric_headers = ["Temperature, water (deg C)", "Turbidity (NTU)", "pH (standard units)", "Oxygen, dissolved (mg/L)"]
     sums = {h: 0.0 for h in numeric_headers}
     counts = {h: 0 for h in numeric_headers}
-    with schema_csv_path.open("r", newline="", encoding="utf-8") as f:
+    
+    if schema_csv_path.suffix.lower() == '.gz':
+        f = gzip.open(schema_csv_path, "rt", encoding="utf-8", newline="")
+    else:
+        f = schema_csv_path.open("r", newline="", encoding="utf-8")
+        
+    with f:
         reader = csv.DictReader(f)
         if not reader.fieldnames: return {}
         available = [h for h in numeric_headers if h in reader.fieldnames]
