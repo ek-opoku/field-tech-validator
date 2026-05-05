@@ -103,8 +103,11 @@ def inject_glove_ui_css() -> None:
           }
           .stApp, .stApp p, .stApp span, .stApp div, .stApp label, .stMarkdown, .stCaption {
             color: #111827 !important;
+            font-size: 1.15rem !important;
           }
-          h1, h2, h3 { color: #0b5ed7 !important; }
+          h1 { color: #0b5ed7 !important; font-size: 2.5rem !important; }
+          h2 { color: #0b5ed7 !important; font-size: 2.0rem !important; }
+          h3 { color: #0b5ed7 !important; font-size: 1.75rem !important; }
 
           [data-testid="stSidebar"] {
             background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 55%, #eef2f7 100%) !important;
@@ -113,7 +116,7 @@ def inject_glove_ui_css() -> None:
             font-family: 'Inter', sans-serif !important;
           }
           [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
-            padding: 1.15rem 0.85rem 1.5rem 0.85rem !important;
+            padding: 1.5rem 1rem 2rem 1rem !important;
           }
           [data-testid="stSidebar"] label,
           [data-testid="stSidebar"] .stMarkdown,
@@ -121,7 +124,8 @@ def inject_glove_ui_css() -> None:
           [data-testid="stSidebar"] .stCaption { color: #64748b !important; }
           [data-testid="stSidebar"] .stTextInput input, [data-testid="stSidebar"] .stNumberInput input, [data-testid="stSidebar"] [data-baseweb="select"] > div, [data-testid="stSidebar"] [data-baseweb="base-input"] > div {
             background: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important;
-            border-radius: 8px !important; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+            border-radius: 12px !important; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+            min-height: 56px !important; font-size: 1.15rem !important;
           }
           [data-testid="stSidebar"] [data-baseweb="select"] input,
           [data-testid="stSidebar"] [data-baseweb="select"] span,
@@ -137,10 +141,10 @@ def inject_glove_ui_css() -> None:
             border-bottom: 1px solid #e2e8f0 !important;
           }
           [data-testid="stSidebarNav"] a {
-            color: #334155 !important; font-weight: 500 !important; font-size: 0.9375rem !important;
+            color: #334155 !important; font-weight: 500 !important; font-size: 1.15rem !important;
             letter-spacing: -0.01em !important;
-            padding: 0.62rem 0.85rem 0.62rem 0.75rem !important; margin: 0.1rem 0.2rem !important;
-            border-radius: 8px !important; border-left: 3px solid transparent !important;
+            padding: 0.85rem 1rem 0.85rem 0.85rem !important; margin: 0.2rem 0.2rem !important;
+            border-radius: 10px !important; border-left: 3px solid transparent !important;
           }
           [data-testid="stSidebarNav"] a:hover {
             background: #ffffff !important; color: #0b5ed7 !important;
@@ -152,8 +156,8 @@ def inject_glove_ui_css() -> None:
           }
           [data-testid="stSidebar"] .stButton > button {
             background: #0b5ed7 !important; color: #ffffff !important; border: 1px solid #0a53be !important;
-            border-radius: 8px !important; font-weight: 600 !important; font-size: 0.9375rem !important;
-            min-height: 2.5rem !important; padding: 0.45rem 0.85rem !important;
+            border-radius: 10px !important; font-weight: 600 !important; font-size: 1.15rem !important;
+            min-height: 3.5rem !important; padding: 0.65rem 1rem !important;
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
           }
           [data-testid="stSidebar"] .stButton > button:hover {
@@ -161,16 +165,16 @@ def inject_glove_ui_css() -> None:
           }
           section.main > div { padding-top: 1rem; padding-bottom: 2.5rem; }
           .stButton > button, button[kind="primary"], button[kind="secondary"] {
-            min-height: 72px !important; font-size: 1.15rem !important; font-weight: 750 !important;
-            border-radius: 18px !important; padding: 14px 18px !important; background: #0b5ed7 !important;
+            min-height: 80px !important; font-size: 1.35rem !important; font-weight: 750 !important;
+            border-radius: 20px !important; padding: 18px 24px !important; background: #0b5ed7 !important;
             color: #ffffff !important; border: 1px solid #0a53be !important;
           }
           .stButton > button:hover, button[kind="primary"]:hover, button[kind="secondary"]:hover {
             background: #0a53be !important; border-color: #0848a4 !important;
           }
           div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] > div {
-            min-height: 56px !important; border-radius: 16px !important; font-size: 1.05rem !important;
-            background-color: #ffffff !important; color: #111827 !important;
+            min-height: 64px !important; border-radius: 16px !important; font-size: 1.25rem !important;
+            background-color: #ffffff !important; color: #111827 !important; padding: 0.5rem 1rem !important;
           }
           [data-baseweb="popover"] [role="listbox"],
           [data-baseweb="popover"] [role="option"],
@@ -182,14 +186,17 @@ def inject_glove_ui_css() -> None:
           [data-testid="stExpander"] { background-color: #ffffff !important; border-radius: 12px; }
           [data-testid="stExpander"] details { background-color: #ffffff !important; border-radius: 12px; }
           [data-testid="stExpander"] summary { background-color: #f3f4f6 !important; color: #111827 !important; border-radius: 12px; }
-          [data-testid="stExpander"] summary p { color: #111827 !important; font-weight: 700 !important; font-size: 1.1rem !important; }
-          label { font-size: 1.02rem !important; }
+          [data-testid="stExpander"] summary p { color: #111827 !important; font-weight: 700 !important; font-size: 1.25rem !important; }
+          label { font-size: 1.25rem !important; font-weight: 600 !important; }
+          [data-baseweb="radio"] label, [data-baseweb="checkbox"] label {
+            font-size: 1.2rem !important; padding-top: 0.75rem !important; padding-bottom: 0.75rem !important;
+          }
           .qc-popup {
             position: sticky; top: 0; z-index: 9999; margin: 0.5rem 0 1rem 0; padding: 16px 16px;
             border-radius: 18px; border: 2px solid rgba(255, 255, 255, 0.25); background: #b00020;
             color: white; font-weight: 850; font-size: 1.08rem; box-shadow: 0 16px 40px rgba(176, 0, 32, 0.38);
           }
-          @media (max-width: 640px) { .stButton > button { min-height: 78px !important; font-size: 1.18rem !important; } }
+          @media (max-width: 640px) { .stButton > button { min-height: 90px !important; font-size: 1.45rem !important; } }
           
           /* Metric Bubbles - Visually Neat */
           [data-testid="stMetric"] {

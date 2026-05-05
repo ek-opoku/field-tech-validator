@@ -17,8 +17,9 @@ def apply_water_theme() -> None:
           }
 
           /* Safely apply font to text elements without overriding icons */
-          html, body, [class*="css"], p, a, h1, h2, h3, h4, h5, h6, label, li {
+          html, body, [class*="css"], p, a, h1, h2, h3, h4, h5, h6, label, li, span, div {
             font-family: 'Inter', sans-serif !important;
+            font-size: 1.15rem;
           }
 
           .stApp,
@@ -31,9 +32,9 @@ def apply_water_theme() -> None:
             color: #0f172a !important;
           }
 
-          h1, h2, h3 {
-            color: #0b5ed7 !important;
-          }
+          h1 { color: #0b5ed7 !important; font-size: 2.5rem !important; }
+          h2 { color: #0b5ed7 !important; font-size: 2.0rem !important; }
+          h3 { color: #0b5ed7 !important; font-size: 1.75rem !important; }
 
           /* Sidebar: professional light rail (enterprise dashboard style) */
           [data-testid="stSidebar"] {
@@ -42,7 +43,7 @@ def apply_water_theme() -> None:
             box-shadow: inset -1px 0 0 rgba(15, 23, 42, 0.04) !important;
           }
           [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
-            padding: 1.15rem 0.85rem 1.5rem 0.85rem !important;
+            padding: 1.5rem 1rem 2rem 1rem !important;
           }
           [data-testid="stSidebar"] .block-container {
             padding-top: 0.35rem !important;
@@ -64,8 +65,10 @@ def apply_water_theme() -> None:
             background: #ffffff !important;
             color: #0f172a !important;
             border: 1px solid #cbd5e1 !important;
-            border-radius: 8px !important;
+            border-radius: 12px !important;
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+            min-height: 56px !important;
+            font-size: 1.15rem !important;
           }
           [data-testid="stSidebar"] [data-baseweb="select"] input,
           [data-testid="stSidebar"] [data-baseweb="select"] span,
@@ -99,11 +102,11 @@ def apply_water_theme() -> None:
           [data-testid="stSidebarNav"] a {
             color: #334155 !important;
             font-weight: 500 !important;
-            font-size: 0.9375rem !important;
+            font-size: 1.15rem !important;
             letter-spacing: -0.01em !important;
-            padding: 0.62rem 0.85rem 0.62rem 0.75rem !important;
-            margin: 0.1rem 0.2rem !important;
-            border-radius: 8px !important;
+            padding: 0.85rem 1rem 0.85rem 0.85rem !important;
+            margin: 0.2rem 0.2rem !important;
+            border-radius: 10px !important;
             border-left: 3px solid transparent !important;
             transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease !important;
           }
@@ -124,11 +127,11 @@ def apply_water_theme() -> None:
             background: #0b5ed7 !important;
             color: #ffffff !important;
             border: 1px solid #0a53be !important;
-            border-radius: 8px !important;
+            border-radius: 10px !important;
             font-weight: 600 !important;
-            font-size: 0.9375rem !important;
-            min-height: 2.5rem !important;
-            padding: 0.45rem 0.85rem !important;
+            font-size: 1.15rem !important;
+            min-height: 3.5rem !important;
+            padding: 0.65rem 1rem !important;
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
           }
           [data-testid="stSidebar"] .stButton > button:hover {
@@ -144,10 +147,11 @@ def apply_water_theme() -> None:
             background: #0b5ed7 !important;
             color: #ffffff !important;
             border: 1px solid #0a53be !important;
-            border-radius: 10px !important;
-            min-height: 2.75rem !important;
-            padding: 0.6rem 1rem !important;
-            font-weight: 600 !important;
+            border-radius: 20px !important;
+            min-height: 80px !important;
+            padding: 18px 24px !important;
+            font-size: 1.35rem !important;
+            font-weight: 750 !important;
           }
           .stButton > button:hover,
           button[kind="primary"]:hover,
@@ -167,9 +171,10 @@ def apply_water_theme() -> None:
           [data-testid="stTab"] {
             background: #eff6ff !important;
             color: #0f172a !important;
-            border-radius: 10px !important;
-            padding: 0.65rem 1.25rem !important;
-            min-height: 2.75rem !important;
+            border-radius: 12px !important;
+            padding: 0.85rem 1.5rem !important;
+            min-height: 3.5rem !important;
+            font-size: 1.15rem !important;
             line-height: 1.35 !important;
             box-sizing: border-box !important;
             margin: 0 !important;
@@ -214,6 +219,10 @@ def apply_water_theme() -> None:
             background-color: #f8fafc !important;
             color: #0f172a !important;
             border: 1px solid #cbd5e1 !important;
+            min-height: 64px !important;
+            font-size: 1.25rem !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 16px !important;
           }
           [data-baseweb="popover"] > div {
             background-color: #ffffff !important;
