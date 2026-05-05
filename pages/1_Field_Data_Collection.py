@@ -151,13 +151,13 @@ def inject_glove_ui_css() -> None:
             border-left-color: #0b5ed7 !important; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08) !important;
           }
           [data-testid="stSidebar"] .stButton > button {
-            background: #ffffff !important; color: #0b5ed7 !important; border: 1px solid #cbd5e1 !important;
+            background: #0b5ed7 !important; color: #ffffff !important; border: 1px solid #0a53be !important;
             border-radius: 8px !important; font-weight: 600 !important; font-size: 0.9375rem !important;
             min-height: 2.5rem !important; padding: 0.45rem 0.85rem !important;
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
           }
           [data-testid="stSidebar"] .stButton > button:hover {
-            background: #eff6ff !important; border-color: #93c5fd !important; color: #0a53be !important;
+            background: #0a53be !important; border-color: #0848a4 !important; color: #ffffff !important;
           }
           section.main > div { padding-top: 1rem; padding-bottom: 2.5rem; }
           .stButton > button, button[kind="primary"], button[kind="secondary"] {
@@ -827,3 +827,4 @@ else:
                         st.session_state.trip_data.append(row_data)
                         st.session_state.saved_site = monitoring_location_identifier
                         st.rerun()
+

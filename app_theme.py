@@ -121,9 +121,9 @@ def apply_water_theme() -> None:
           }
 
           [data-testid="stSidebar"] .stButton > button {
-            background: #ffffff !important;
-            color: #0b5ed7 !important;
-            border: 1px solid #cbd5e1 !important;
+            background: #0b5ed7 !important;
+            color: #ffffff !important;
+            border: 1px solid #0a53be !important;
             border-radius: 8px !important;
             font-weight: 600 !important;
             font-size: 0.9375rem !important;
@@ -132,9 +132,9 @@ def apply_water_theme() -> None:
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
           }
           [data-testid="stSidebar"] .stButton > button:hover {
-            background: #eff6ff !important;
-            border-color: #93c5fd !important;
-            color: #0a53be !important;
+            background: #0a53be !important;
+            border-color: #0848a4 !important;
+            color: #ffffff !important;
           }
 
           /* Buttons: blue theme + white text */
@@ -145,6 +145,9 @@ def apply_water_theme() -> None:
             color: #ffffff !important;
             border: 1px solid #0a53be !important;
             border-radius: 10px !important;
+            min-height: 2.75rem !important;
+            padding: 0.6rem 1rem !important;
+            font-weight: 600 !important;
           }
           .stButton > button:hover,
           button[kind="primary"]:hover,
@@ -238,3 +241,4 @@ def apply_water_theme() -> None:
         """,
         unsafe_allow_html=True,
     )
+

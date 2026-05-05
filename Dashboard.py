@@ -222,9 +222,25 @@ with tab2:
         if compare_mode:
             selected_param2 = st.selectbox("Select 2nd Parameter:", options=list(param_mapping.keys()), index=1)
             target_col2 = param_mapping[selected_param2]
+
+    # Date filtering (use dataset min/max as defaults)
+    min_date = df["Date"].min().date()
+    max_date = df["Date"].max().date()
+    date_range = st.date_input(
+        "Date Range (applies to maps):",
+        value=(min_date, max_date),
+        min_value=min_date,
+        max_value=max_date,
+    )
+    if isinstance(date_range, tuple) and len(date_range) == 2:
+        start_d, end_d = date_range
+    else:
+        start_d, end_d = min_date, max_date
             
     def create_map(param_name, column_name):
-        df_map = df.dropna(subset=[column_name, "Latitude", "Longitude"])
+        df_map = df[(df["Date"].dt.date >= start_d) & (df["Date"].dt.date <= end_d)].dropna(
+            subset=[column_name, "Latitude", "Longitude"]
+        )
         # Aggregate to prevent plotting 1M points on the map
         df_map = df_map.groupby(["SiteID", "Latitude", "Longitude"], as_index=False)[column_name].mean()
         cmap = _spatial_colorscale_for_param(param_name)
@@ -239,7 +255,7 @@ with tab2:
             size_max=15,
             zoom=7,
             mapbox_style="carto-positron",
-            title=f"Spatial Distribution of {param_name}",
+            title=f"Spatial Distribution of {param_name} ({start_d}–{end_d})",
             height=800
         )
         fig.update_layout(
