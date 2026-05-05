@@ -190,6 +190,25 @@ def inject_glove_ui_css() -> None:
             color: white; font-weight: 850; font-size: 1.08rem; box-shadow: 0 16px 40px rgba(176, 0, 32, 0.38);
           }
           @media (max-width: 640px) { .stButton > button { min-height: 78px !important; font-size: 1.18rem !important; } }
+          
+          /* Metric Bubbles - Visually Neat */
+          [data-testid="stMetric"] {
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 16px !important;
+            padding: 1.25rem !important;
+            box-shadow: 0 4px 6px rgba(15, 23, 42, 0.05), 0 10px 15px rgba(15, 23, 42, 0.03) !important;
+            text-align: center !important;
+            transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+          }
+          [data-testid="stMetric"]:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 12px rgba(15, 23, 42, 0.08), 0 12px 20px rgba(15, 23, 42, 0.05) !important;
+          }
+          [data-testid="stMetricValue"] {
+            color: #0b5ed7 !important;
+            font-weight: 700 !important;
+          }
         </style>
         """, unsafe_allow_html=True
     )
