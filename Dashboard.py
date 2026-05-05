@@ -32,14 +32,71 @@ def load_data():
         return pd.DataFrame(dummy_data)
 
 df = load_data()
-WATER_SCALE = [
-    [0.0, "#dbeafe"],
-    [0.25, "#93c5fd"],
-    [0.5, "#38bdf8"],
-    [0.75, "#0ea5e9"],
-    [1.0, "#0b5ed7"],
-]
 WATER_LINE_COLORS = ["#0b5ed7", "#0284c7", "#06b6d4"]
+
+
+def _spatial_colorscale_for_param(param_display_name: str):
+    """Continuous colorscale per spatial parameter (points + color bar), distinct from each other."""
+    scales: dict[str, list[str]] = {
+        "pH": px.colors.diverging.RdYlBu,
+        "Temperature": px.colors.sequential.YlOrRd,
+        "Turbidity": px.colors.sequential.YlGn,
+        "Dissolved Oxygen (mg/L)": px.colors.sequential.Mint,
+        "Dissolved Oxygen (% sat)": px.colors.sequential.Purples,
+        "Nitrate": px.colors.sequential.OrRd,
+        "Nitrite": px.colors.sequential.Reds,
+        "Orthophosphate": px.colors.sequential.PuRd,
+        "Conductivity": px.colors.sequential.Plasma,
+        "Depth to Water": px.colors.sequential.Cividis,
+    }
+    return scales.get(param_display_name, px.colors.sequential.Viridis)
+
+# Executive KPIs: short titles + units parsed from schema column names
+_PARAM_SHORT_NAMES: dict[str, str] = {
+    "pH (standard units)": "pH",
+    "Temperature, water (deg C)": "Temperature",
+    "Turbidity (NTU)": "Turbidity",
+    "Oxygen, dissolved (mg/L)": "Dissolved oxygen",
+    "Oxygen, dissolved (% saturation)": "DO saturation",
+    "Nitrate, dissolved (mg/L as N)": "Nitrate",
+    "Nitrite, dissolved (mg/L as N)": "Nitrite",
+    "Orthophosphate, dissolved (mg/L as P)": "Orthophosphate",
+    "Conductivity (uS/cm)": "Conductivity",
+    "Depth to water table (m)": "Depth to water",
+    "Latitude": "Latitude",
+    "Longitude": "Longitude",
+}
+
+
+def _unit_from_column_name(col: str) -> str:
+    if "(" in col and col.rstrip().endswith(")"):
+        return col[col.index("(") + 1 : col.rindex(")")].strip()
+    return ""
+
+
+def _short_param_name(col: str) -> str:
+    if col in _PARAM_SHORT_NAMES:
+        return _PARAM_SHORT_NAMES[col]
+    if "(" in col:
+        base = col.split(" (")[0].strip()
+        return base.split(",")[0].strip()[:22] if len(base) > 22 else base.split(",")[0].strip()
+    return col[:22]
+
+
+def executive_metric_label_value(col: str, val) -> tuple[str, str]:
+    """Return (metric label with unit in parentheses, numeric value only) for executive metrics."""
+    short = _short_param_name(col)
+    unit = _unit_from_column_name(col)
+    label = f"{short} ({unit})" if unit else short
+    if val is None or (isinstance(val, float) and pd.isna(val)):
+        return label, "N/A"
+    try:
+        v = float(val)
+    except (TypeError, ValueError):
+        return label, str(val)
+    formatted = f"{v:,.2f}" if abs(v) >= 1000 else f"{v:.2f}"
+    return label, formatted
+
 
 st.title('FieldOps Groundwater Validator')
 
@@ -85,8 +142,8 @@ with tab1:
             st.plotly_chart(fig_pie, use_container_width=True)
             
         with col_stats:
-            st.metric("Sites Completed", completed_count)
-            st.metric("Sites Remaining", remaining_count)
+            st.metric("Sites completed (count)", f"{completed_count:,}")
+            st.metric("Sites remaining (count)", f"{remaining_count:,}")
             
         with col_resume:
             st.write("") 
@@ -109,17 +166,17 @@ with tab1:
                     rows = [st.columns(5) for _ in range((len(valid_cols) + 4) // 5)]
                     for i, c in enumerate(valid_cols):
                         val = trip_df[c].mean()
-                        label = "pH" if "pH" in c else c.split(" (")[0].split(",")[0][:15]
-                        rows[i // 5][i % 5].metric(label, round(val, 2))
+                        label, value_s = executive_metric_label_value(c, val)
+                        rows[i // 5][i % 5].metric(label, value_s)
                     
         st.divider()
 
     st.subheader('Overall Database Metrics')
     c1, c2 = st.columns(2)
-    c1.metric("Total Samples", f"{len(df):,}")
-    c2.metric("Active Wells", df['SiteID'].nunique())
+    c1.metric("Total samples (records)", f"{len(df):,}")
+    c2.metric("Active monitoring wells (count)", f"{df['SiteID'].nunique():,}")
     
-    st.write("**Global Averages**")
+    st.write("**Global averages (mean)**")
     all_params = [
         "pH (standard units)", "Temperature, water (deg C)", "Turbidity (NTU)", 
         "Oxygen, dissolved (mg/L)", "Oxygen, dissolved (% saturation)",
@@ -131,8 +188,8 @@ with tab1:
     for i, p in enumerate(all_params):
         if p in df.columns:
             val = df[p].mean()
-            label = "pH" if "pH" in p else p.split(" (")[0].split(",")[0][:15]
-            metric_cols[i // 5][i % 5].metric(label, f"{val:.2f}" if pd.notna(val) else "N/A")
+            label, value_s = executive_metric_label_value(p, val)
+            metric_cols[i // 5][i % 5].metric(label, value_s)
 
 with tab2:
     st.header('Spatial Distribution')
@@ -170,6 +227,7 @@ with tab2:
         df_map = df.dropna(subset=[column_name, "Latitude", "Longitude"])
         # Aggregate to prevent plotting 1M points on the map
         df_map = df_map.groupby(["SiteID", "Latitude", "Longitude"], as_index=False)[column_name].mean()
+        cmap = _spatial_colorscale_for_param(param_name)
         fig = px.scatter_mapbox(
             df_map,
             lat="Latitude",
@@ -177,7 +235,7 @@ with tab2:
             color=column_name,
             size=df_map[column_name].abs(),
             hover_name="SiteID",
-            color_continuous_scale=WATER_SCALE,
+            color_continuous_scale=cmap,
             size_max=15,
             zoom=7,
             mapbox_style="carto-positron",
@@ -191,6 +249,7 @@ with tab2:
             font={"color": "#0f172a"},
             coloraxis_colorbar={"title": param_name},
         )
+        fig.update_traces(marker=dict(opacity=0.88))
         return fig
         
     if compare_mode:

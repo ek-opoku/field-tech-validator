@@ -5,7 +5,7 @@ def apply_water_theme() -> None:
     st.markdown(
         """
         <style>
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
           /* Global white surface + readable text */
           .stApp,
@@ -35,41 +35,106 @@ def apply_water_theme() -> None:
             color: #0b5ed7 !important;
           }
 
-          /* Sidebar: solid blue with white text */
+          /* Sidebar: professional light rail (enterprise dashboard style) */
           [data-testid="stSidebar"] {
-            background: #0b5ed7 !important;
-            border-right: 1px solid #0a53be !important;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 55%, #eef2f7 100%) !important;
+            border-right: 1px solid #e2e8f0 !important;
+            box-shadow: inset -1px 0 0 rgba(15, 23, 42, 0.04) !important;
           }
-          [data-testid="stSidebar"] * {
-            color: #ffffff !important;
+          [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+            padding: 1.15rem 0.85rem 1.5rem 0.85rem !important;
           }
-          [data-testid="stSidebar"] .stTextInput input,
-          [data-testid="stSidebar"] .stNumberInput input,
-          [data-testid="stSidebar"] [data-baseweb="select"] > div {
-            background: #0a53be !important;
-            color: #ffffff !important;
-            border-color: #ffffff !important;
+          [data-testid="stSidebar"] .block-container {
+            padding-top: 0.35rem !important;
+            padding-bottom: 1rem !important;
           }
-          [data-testid="stSidebar"] .stTextInput input::placeholder {
-            color: rgba(255, 255, 255, 0.85) !important;
+          [data-testid="stSidebar"] label,
+          [data-testid="stSidebar"] .stMarkdown,
+          [data-testid="stSidebar"] .stMarkdown p {
+            color: #475569 !important;
           }
-          [data-testid="stSidebar"] [data-baseweb="tag"] {
-            background: #0848a4 !important;
-            color: #ffffff !important;
-            border: 1px solid rgba(255, 255, 255, 0.6) !important;
+          [data-testid="stSidebar"] .stCaption {
+            color: #64748b !important;
           }
 
-          /* Multipage nav links in sidebar */
-          [data-testid="stSidebarNav"] a {
-            color: #ffffff !important;
+          [data-testid="stSidebar"] .stTextInput input,
+          [data-testid="stSidebar"] .stNumberInput input,
+          [data-testid="stSidebar"] [data-baseweb="select"] > div,
+          [data-testid="stSidebar"] [data-baseweb="base-input"] > div {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border: 1px solid #cbd5e1 !important;
             border-radius: 8px !important;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+          }
+          [data-testid="stSidebar"] [data-baseweb="select"] input,
+          [data-testid="stSidebar"] [data-baseweb="select"] span,
+          [data-testid="stSidebar"] [data-baseweb="select"] svg,
+          [data-testid="stSidebar"] [data-baseweb="radio"] label,
+          [data-testid="stSidebar"] [data-baseweb="checkbox"] label {
+            color: #0f172a !important;
+            fill: #0f172a !important;
+          }
+          [data-testid="stSidebar"] .stTextInput input::placeholder {
+            color: #94a3b8 !important;
+          }
+          [data-testid="stSidebar"] [data-baseweb="tag"] {
+            background: #e0e7ff !important;
+            color: #1e3a8a !important;
+            border: 1px solid #a5b4fc !important;
+          }
+
+          /* Multipage navigation */
+          [data-testid="stSidebarNav"] {
+            margin: 0 -0.15rem 0.75rem -0.15rem !important;
+            padding: 0.35rem 0 0.85rem 0 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+          }
+          [data-testid="stSidebarNav"] ul {
+            gap: 0.2rem !important;
+          }
+          [data-testid="stSidebarNav"] li {
+            margin: 0 !important;
+          }
+          [data-testid="stSidebarNav"] a {
+            color: #334155 !important;
+            font-weight: 500 !important;
+            font-size: 0.9375rem !important;
+            letter-spacing: -0.01em !important;
+            padding: 0.62rem 0.85rem 0.62rem 0.75rem !important;
+            margin: 0.1rem 0.2rem !important;
+            border-radius: 8px !important;
+            border-left: 3px solid transparent !important;
+            transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease !important;
           }
           [data-testid="stSidebarNav"] a:hover {
-            background: rgba(255, 255, 255, 0.18) !important;
+            background: #ffffff !important;
+            color: #0b5ed7 !important;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.07) !important;
           }
           [data-testid="stSidebarNav"] a[aria-current="page"] {
-            background: rgba(255, 255, 255, 0.25) !important;
-            font-weight: 700 !important;
+            background: #ffffff !important;
+            color: #0b5ed7 !important;
+            font-weight: 600 !important;
+            border-left-color: #0b5ed7 !important;
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08) !important;
+          }
+
+          [data-testid="stSidebar"] .stButton > button {
+            background: #ffffff !important;
+            color: #0b5ed7 !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 0.9375rem !important;
+            min-height: 2.5rem !important;
+            padding: 0.45rem 0.85rem !important;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+          }
+          [data-testid="stSidebar"] .stButton > button:hover {
+            background: #eff6ff !important;
+            border-color: #93c5fd !important;
+            color: #0a53be !important;
           }
 
           /* Buttons: blue theme + white text */
@@ -88,22 +153,48 @@ def apply_water_theme() -> None:
             border-color: #0848a4 !important;
           }
 
-          /* Tabs */
-          button[data-baseweb="tab"] {
+          /* Tabs — room inside each label + space between tabs */
+          .stTabs [role="tablist"],
+          .stTabs [data-baseweb="tab-list"] {
+            gap: 0.5rem !important;
+            padding: 0.2rem 0 0.35rem 0 !important;
+            flex-wrap: wrap !important;
+          }
+          button[data-baseweb="tab"],
+          [data-testid="stTab"] {
             background: #eff6ff !important;
             color: #0f172a !important;
             border-radius: 10px !important;
+            padding: 0.65rem 1.25rem !important;
+            min-height: 2.75rem !important;
+            line-height: 1.35 !important;
+            box-sizing: border-box !important;
+            margin: 0 !important;
           }
-          button[data-baseweb="tab"][aria-selected="true"] {
+          button[data-baseweb="tab"] span,
+          [data-testid="stTab"] span {
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          button[data-baseweb="tab"]:not([aria-selected="true"]) *,
+          [data-testid="stTab"]:not([aria-selected="true"]) * {
+            color: #0f172a !important;
+            -webkit-text-fill-color: #0f172a !important;
+          }
+          button[data-baseweb="tab"][aria-selected="true"],
+          [data-testid="stTab"][aria-selected="true"] {
             background: #0b5ed7 !important;
             color: #ffffff !important;
+          }
+          button[data-baseweb="tab"][aria-selected="true"] *,
+          [data-testid="stTab"][aria-selected="true"] * {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
           }
 
           /* Blue pills/chips/badges should always use white text */
           [data-baseweb="tag"],
-          [data-baseweb="tag"] span,
-          .stTabs [role="tablist"] [aria-selected="true"],
-          .stTabs [role="tablist"] [aria-selected="true"] * {
+          [data-baseweb="tag"] span {
             color: #ffffff !important;
             -webkit-text-fill-color: #ffffff !important;
           }
@@ -123,6 +214,17 @@ def apply_water_theme() -> None:
           }
           [data-baseweb="popover"] > div {
             background-color: #ffffff !important;
+          }
+          [data-baseweb="popover"] [role="listbox"],
+          [data-baseweb="popover"] [role="option"] {
+            background: #ffffff !important;
+            color: #0f172a !important;
+          }
+          [data-baseweb="menu"] li,
+          [data-baseweb="menu"] li *,
+          [data-baseweb="select"] [role="option"],
+          [data-baseweb="select"] [role="option"] * {
+            color: #0f172a !important;
           }
 
           /* Prevent font override for material icons */

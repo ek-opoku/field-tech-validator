@@ -94,6 +94,8 @@ def inject_glove_ui_css() -> None:
     st.markdown(
         """
         <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
           .stApp, section.main, section.main > div, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
             background: #ffffff !important;
           }
@@ -101,15 +103,60 @@ def inject_glove_ui_css() -> None:
             color: #111827 !important;
           }
           h1, h2, h3 { color: #0b5ed7 !important; }
+
           [data-testid="stSidebar"] {
-            background: #0b5ed7 !important; border-right: 1px solid #0a53be !important;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 55%, #eef2f7 100%) !important;
+            border-right: 1px solid #e2e8f0 !important;
+            box-shadow: inset -1px 0 0 rgba(15, 23, 42, 0.04) !important;
+            font-family: 'Inter', sans-serif !important;
           }
-          [data-testid="stSidebar"] * { color: #ffffff !important; }
-          [data-testid="stSidebar"] .stTextInput input, [data-testid="stSidebar"] .stNumberInput input, [data-testid="stSidebar"] [data-baseweb="select"] > div {
-            background: #0a53be !important; color: #ffffff !important; border-color: #ffffff !important;
+          [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+            padding: 1.15rem 0.85rem 1.5rem 0.85rem !important;
           }
-          [data-testid="stSidebar"] .stTextInput input::placeholder { color: rgba(255, 255, 255, 0.85) !important; }
-          [data-testid="stSidebarNav"] a { color: #ffffff !important; }
+          [data-testid="stSidebar"] label,
+          [data-testid="stSidebar"] .stMarkdown,
+          [data-testid="stSidebar"] .stMarkdown p { color: #475569 !important; }
+          [data-testid="stSidebar"] .stCaption { color: #64748b !important; }
+          [data-testid="stSidebar"] .stTextInput input, [data-testid="stSidebar"] .stNumberInput input, [data-testid="stSidebar"] [data-baseweb="select"] > div, [data-testid="stSidebar"] [data-baseweb="base-input"] > div {
+            background: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+          }
+          [data-testid="stSidebar"] [data-baseweb="select"] input,
+          [data-testid="stSidebar"] [data-baseweb="select"] span,
+          [data-testid="stSidebar"] [data-baseweb="select"] svg,
+          [data-testid="stSidebar"] [data-baseweb="radio"] label,
+          [data-testid="stSidebar"] [data-baseweb="checkbox"] label {
+            color: #0f172a !important; fill: #0f172a !important;
+          }
+          [data-testid="stSidebar"] .stTextInput input::placeholder { color: #94a3b8 !important; }
+          [data-testid="stSidebarNav"] {
+            margin: 0 -0.15rem 0.75rem -0.15rem !important;
+            padding: 0.35rem 0 0.85rem 0 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+          }
+          [data-testid="stSidebarNav"] a {
+            color: #334155 !important; font-weight: 500 !important; font-size: 0.9375rem !important;
+            letter-spacing: -0.01em !important;
+            padding: 0.62rem 0.85rem 0.62rem 0.75rem !important; margin: 0.1rem 0.2rem !important;
+            border-radius: 8px !important; border-left: 3px solid transparent !important;
+          }
+          [data-testid="stSidebarNav"] a:hover {
+            background: #ffffff !important; color: #0b5ed7 !important;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.07) !important;
+          }
+          [data-testid="stSidebarNav"] a[aria-current="page"] {
+            background: #ffffff !important; color: #0b5ed7 !important; font-weight: 600 !important;
+            border-left-color: #0b5ed7 !important; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08) !important;
+          }
+          [data-testid="stSidebar"] .stButton > button {
+            background: #ffffff !important; color: #0b5ed7 !important; border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important; font-weight: 600 !important; font-size: 0.9375rem !important;
+            min-height: 2.5rem !important; padding: 0.45rem 0.85rem !important;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+          }
+          [data-testid="stSidebar"] .stButton > button:hover {
+            background: #eff6ff !important; border-color: #93c5fd !important; color: #0a53be !important;
+          }
           section.main > div { padding-top: 1rem; padding-bottom: 2.5rem; }
           .stButton > button, button[kind="primary"], button[kind="secondary"] {
             min-height: 72px !important; font-size: 1.15rem !important; font-weight: 750 !important;
@@ -122,6 +169,13 @@ def inject_glove_ui_css() -> None:
           div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] > div {
             min-height: 56px !important; border-radius: 16px !important; font-size: 1.05rem !important;
             background-color: #ffffff !important; color: #111827 !important;
+          }
+          [data-baseweb="popover"] [role="listbox"],
+          [data-baseweb="popover"] [role="option"],
+          [data-baseweb="menu"] li,
+          [data-baseweb="menu"] li * {
+            background: #ffffff !important;
+            color: #111827 !important;
           }
           [data-testid="stExpander"] { background-color: #ffffff !important; border-radius: 12px; }
           [data-testid="stExpander"] details { background-color: #ffffff !important; border-radius: 12px; }
