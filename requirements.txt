@@ -19,3 +19,4 @@ vosk
 
 pypdf
 python-docx
+streamlit-autorefresh
