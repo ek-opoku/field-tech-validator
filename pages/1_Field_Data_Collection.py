@@ -276,7 +276,6 @@ if not st.session_state.trip_started:
     tab_route, tab_params, tab_sop = st.tabs(["📍 Route & Sites", "⚙️ Parameters & Settings", "📝 Instructions"])
     
     with tab_route:
-        st.subheader("Load Sites & Plan Route")
         st.write("Upload a CSV file with sites for your trip (Must contain 'SiteID', 'Latitude', and 'Longitude' headers) OR select from pre-existing sites below.")
         uploaded_file = st.file_uploader("Upload Sites CSV", type=["csv"])
         if uploaded_file is not None:
@@ -296,24 +295,24 @@ if not st.session_state.trip_started:
         site_options = [s.id for s in st.session_state.preloaded_sites]
         selected_site_ids = st.multiselect("Choose sites for today:", options=site_options, default=[])
         
-        st.write("**Or manually add a new site for this trip:**")
-        col_c1, col_c2, col_c3 = st.columns([2, 1, 1])
-        with col_c1:
-            custom_id = st.text_input("New Site ID", placeholder="e.g. WELL-999")
-        with col_c2:
-            custom_lat = st.number_input("Lat (optional)", format="%.6f", value=None, key="c_lat")
-        with col_c3:
-            custom_lon = st.number_input("Lon (optional)", format="%.6f", value=None, key="c_lon")
-            
-        if st.button("Add Custom Site"):
-            if custom_id:
-                if custom_id not in [s.id for s in st.session_state.preloaded_sites]:
-                    st.session_state.preloaded_sites.append(Site(id=custom_id, lat=custom_lat if custom_lat else 0.0, lon=custom_lon if custom_lon else 0.0))
-                    st.success(f"Added '{custom_id}'! You can now select it above.")
+        with st.expander("➕ Add New Site Manually", expanded=False):
+            col_c1, col_c2, col_c3 = st.columns([2, 1, 1])
+            with col_c1:
+                custom_id = st.text_input("New Site ID", placeholder="e.g. WELL-999")
+            with col_c2:
+                custom_lat = st.number_input("Lat (optional)", format="%.6f", value=None, key="c_lat")
+            with col_c3:
+                custom_lon = st.number_input("Lon (optional)", format="%.6f", value=None, key="c_lon")
+                
+            if st.button("Add Custom Site"):
+                if custom_id:
+                    if custom_id not in [s.id for s in st.session_state.preloaded_sites]:
+                        st.session_state.preloaded_sites.append(Site(id=custom_id, lat=custom_lat if custom_lat else 0.0, lon=custom_lon if custom_lon else 0.0))
+                        st.success(f"Added '{custom_id}'! You can now select it above.")
+                    else:
+                        st.warning(f"Site '{custom_id}' already exists.")
                 else:
-                    st.warning(f"Site '{custom_id}' already exists.")
-            else:
-                st.error("Please provide a Site ID to add.")
+                    st.error("Please provide a Site ID to add.")
         
         st.write("Capture your current GPS location as the starting point:")
         start_location = streamlit_geolocation()

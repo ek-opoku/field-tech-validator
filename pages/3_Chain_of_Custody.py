@@ -8,7 +8,7 @@ from cloud_analytics.chain_of_custody_report import (
     load_state, save_state, iter_new_batches, process_one_batch, sha256_file
 )
 
-st.set_page_config(page_title="Chain of Custody Reports", layout="wide")
+st.set_page_config(page_title="Chain of Custody Reports", layout="wide", initial_sidebar_state="collapsed")
 apply_water_theme()
 st.title("Chain of Custody Reporting")
 st.write("Generate and download automated Chain of Custody PDFs with QA/QC flags for synced batch CSVs.")

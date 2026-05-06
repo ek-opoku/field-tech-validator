@@ -7,7 +7,7 @@ from gateway_sync.gateway_bridge import (
     load_expected_headers, iter_incoming_csv_files, process_inbox_once, try_sync_once, is_online, load_buffer_rows
 )
 
-st.set_page_config(page_title="Gateway Sync", layout="wide")
+st.set_page_config(page_title="Gateway Sync", layout="wide", initial_sidebar_state="collapsed")
 apply_water_theme()
 st.title("Gateway Sync & Buffering")
 st.write("Monitor offline readings and manually trigger sync to the central cloud database.")

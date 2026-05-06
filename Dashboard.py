@@ -4,7 +4,7 @@ import os
 import plotly.express as px
 from app_theme import apply_water_theme
 
-st.set_page_config(page_title="Dashboard", layout="wide")
+st.set_page_config(page_title="Dashboard", layout="wide", initial_sidebar_state="collapsed")
 apply_water_theme()
 
 @st.cache_data(show_spinner="Loading data...")
@@ -98,7 +98,7 @@ def executive_metric_label_value(col: str, val) -> tuple[str, str]:
     return label, formatted
 
 
-st.title('FieldOps Groundwater Validator')
+st.title('Field Tech Validator')
 
 tab1, tab2, tab3 = st.tabs([
     'Executive Dashboard', 
@@ -107,7 +107,6 @@ tab1, tab2, tab3 = st.tabs([
 ])
 
 with tab1:
-    st.header('Executive Dashboard')
     
     if st.session_state.get("trip_started", False):
         st.subheader("Active Field Trip Status")
@@ -192,7 +191,6 @@ with tab1:
             metric_cols[i // 5][i % 5].metric(label, value_s)
 
 with tab2:
-    st.header('Spatial Distribution')
     
     param_mapping = {
         "pH": "pH (standard units)",
@@ -278,7 +276,6 @@ with tab2:
         st.plotly_chart(create_map(selected_param, target_col), use_container_width=True, config={'scrollZoom': True}, theme=None)
 
 with tab3:
-    st.header('Time-Series Visualizations')
     st.write("Analyze temporal trends across the entire groundwater dataset or specific monitoring locations.")
     
     # 1. Filters
