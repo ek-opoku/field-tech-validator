@@ -3,7 +3,7 @@ from app_theme import apply_water_theme
 from PIL import Image
 from pathlib import Path
 
-st.set_page_config(page_title="App Tutorial", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="App Tutorial", layout="centered", initial_sidebar_state="expanded")
 apply_water_theme()
 
 project_root = Path(__file__).resolve().parents[1]
@@ -14,73 +14,106 @@ def load_image(filename):
         return Image.open(path)
     return None
 
-st.title("📚 Field Tech Validator Tutorial")
-st.write("Welcome to the Field Tech Validator! This app is designed to streamline your workflow from route planning to active field sampling, ensuring all data is validated and safely synced to the cloud.")
+if "tutorial_step" not in st.session_state:
+    st.session_state.tutorial_step = 0
 
-st.divider()
+steps = [
+    {"title": "Welcome to Field Tech Validator", "content": "intro"},
+    {"title": "1. Executive Dashboard", "content": "dashboard"},
+    {"title": "2. Phase 1: Route Planning & Prep", "content": "prep"},
+    {"title": "3. Phase 2: Active Data Collection", "content": "sampling"},
+    {"title": "4. Gateway Sync & Cloud Upload", "content": "sync"},
+    {"title": "5. Chain of Custody", "content": "coc"}
+]
 
-# --- Section 1: Dashboard ---
-st.header("1. Executive Dashboard")
-col1a, col1b = st.columns([1, 1.5])
-with col1a:
-    img_dash = load_image("tutorial_dashboard.png")
-    if img_dash: st.image(img_dash, use_container_width=True)
-with col1b:
-    st.markdown("""
-    The **Dashboard** is your high-level overview. 
-    *   **Active Field Trip Status:** Located right at the top. If a trip is active, you'll see a live progress pie chart showing how many sites you've completed vs how many remain. If no trip is active, it will prompt you to start one.
-    *   **Spatial Distribution:** View a heatmap of historical sampling locations.
-    *   **Time-Series Visualizations:** Track long-term trends for specific parameters.
-    """)
+current_step = st.session_state.tutorial_step
 
-st.divider()
+if current_step == -1:
+    st.title("📚 Tutorial Concluded")
+    st.success("You're ready for the field! Head over to **Field Data Collection** from the sidebar to start your first trip.")
+    if st.button("Restart Tutorial"):
+        st.session_state.tutorial_step = 0
+        st.rerun()
+else:
+    step_data = steps[current_step]
+    st.title(step_data["title"])
+    
+    # Progress bar
+    st.progress(current_step / max(1, len(steps) - 1))
+    
+    st.write("") # spacer
+    
+    if step_data["content"] == "intro":
+        st.write("Welcome to the interactive Field Tech Validator tutorial! This app is designed to streamline your workflow from route planning to active field sampling, ensuring all data is validated and safely synced to the cloud.")
+        st.info("Click **Next** below to start learning how to use the app.")
+        
+    elif step_data["content"] == "dashboard":
+        img = load_image("tutorial_dashboard.png")
+        if img: st.image(img, use_container_width=True, caption="Executive Dashboard (Mobile View)")
+        st.markdown("""
+        The **Dashboard** is your high-level overview. 
+        *   **Active Field Trip Status:** Located at the top. If a trip is active, you'll see a live progress pie chart. If not, it will prompt you to start one.
+        *   **Spatial Distribution:** View a heatmap of historical sampling locations.
+        *   **Time-Series Visualizations:** Track long-term trends for specific parameters.
+        """)
+        
+    elif step_data["content"] == "prep":
+        img = load_image("tutorial_prep.png")
+        if img: st.image(img, use_container_width=True, caption="Field Data Collection - Phase 1")
+        st.markdown("""
+        Before heading into the field, you must start in **Field Data Collection**.
+        *   **📍 Route:** Upload your daily route CSV or select a default site.
+        *   **⚙️ Params:** Select which water quality parameters you are measuring.
+        *   **📝 SOP:** Upload your Standard Operating Procedures (TXT, PDF, Word). The app will load them into the **Field Assistant** so they can be read aloud to you.
+        """)
+        
+    elif step_data["content"] == "sampling":
+        img = load_image("tutorial_sampling.png")
+        if img: st.image(img, use_container_width=True, caption="Field Data Collection - Phase 2")
+        st.markdown("""
+        Once you click **Begin Trip**, the app locks into offline-first mode.
+        *   **Ground-Truth-Guard:** As you type in parameter values, the app checks them in real-time against historical averages. If a value is suspicious, you'll be warned.
+        *   **SOP Audio Reader:** Expand the `📖 SOP Quick Reference` at the top and hit **🔊 Read Aloud**.
+        *   **Saving:** Hitting 'Save' drops the data into a secure offline queue. No internet required!
+        """)
+        
+    elif step_data["content"] == "sync":
+        img = load_image("tutorial_sync.png")
+        if img: st.image(img, use_container_width=True, caption="Gateway Sync Dashboard")
+        st.markdown("""
+        When you drive back into cell service, head to the **Gateway Sync** page.
+        *   **Auto-Sync Mode:** Toggle the **🔄 Auto-Sync** switch ON. The app will automatically push your offline queue securely to the cloud.
+        *   **Visual Audit:** Expand the section to see exactly what records are waiting to be uploaded.
+        *   **Emergency Export:** Export the entire pending queue directly to a USB drive from here.
+        """)
+        
+    elif step_data["content"] == "coc":
+        img = load_image("tutorial_coc.png")
+        if img: st.image(img, use_container_width=True, caption="Chain of Custody Generator")
+        st.markdown("""
+        The **Chain of Custody** page is for generating compliance reports.
+        *   You can select any active or completed trip.
+        *   Clicking **Generate PDF Report** will instantly create a formal, printable Chain of Custody document containing all your timestamps, coordinates, and signatures.
+        """)
 
-# --- Section 2: Preparation ---
-st.header("2. Phase 1: Route Planning & Prep")
-col2a, col2b = st.columns([1.5, 1])
-with col2a:
-    st.markdown("""
-    Before heading into the field, you must start in **Field Data Collection**.
-    *   **📍 Route:** Upload your daily route CSV. The app will use advanced OSRM routing to optimize your path and save you driving time.
-    *   **⚙️ Params:** Select which water quality parameters you are measuring. (All parameters are enabled by default).
-    *   **📝 SOP:** Upload your Standard Operating Procedures (TXT, PDF, Word). The app will load them into the **Field Assistant** so they can be read aloud to you while you work.
-    """)
-with col2b:
-    img_prep = load_image("tutorial_prep.png")
-    if img_prep: st.image(img_prep, use_container_width=True)
-
-st.divider()
-
-# --- Section 3: Active Collection ---
-st.header("3. Phase 2: Active Data Collection")
-col3a, col3b = st.columns([1, 1.5])
-with col3a:
-    img_samp = load_image("tutorial_sampling.png")
-    if img_samp: st.image(img_samp, use_container_width=True)
-with col3b:
-    st.markdown("""
-    Once you click **Begin Trip**, the app locks into offline-first mode.
-    *   **Ground-Truth-Guard:** As you type in parameter values (pH, Turbidity, etc.), the app checks them in real-time. If a value is suspiciously high compared to historical averages, the box turns red and you will be warned.
-    *   **SOP Audio Reader:** Expand the `📖 SOP Quick Reference` at the top and hit **🔊 Read Aloud**. Your device will read the instructions to you so you can keep your gloves on.
-    *   **Saving:** Hitting 'Save' drops the data into a secure offline queue. You do not need internet access to collect data.
-    """)
-
-st.divider()
-
-# --- Section 4: Gateway Sync ---
-st.header("4. Gateway Sync & Cloud Upload")
-col4a, col4b = st.columns([1.5, 1])
-with col4a:
-    st.markdown("""
-    When you drive back into cell service, head to the **Gateway Sync** page.
-    *   **Auto-Sync Mode:** Toggle the **🔄 Auto-Sync** switch ON. The app will automatically detect when you have internet and push your offline queue securely to the cloud.
-    *   **Visual Audit:** You can expand the `🔍 View Buffered Records` section to see exactly what records are waiting to be uploaded.
-    *   **Emergency Export:** If your device is broken or stuck offline, you can export the entire pending queue directly to a USB drive from here.
-    """)
-with col4b:
-    img_sync = load_image("tutorial_sync.png")
-    if img_sync: st.image(img_sync, use_container_width=True)
-
-st.divider()
-
-st.success("You're ready for the field! Head over to **Field Data Collection** to start your first trip.")
+    st.divider()
+    
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col1:
+        if current_step > 0:
+            if st.button("⬅️ Previous", use_container_width=True):
+                st.session_state.tutorial_step -= 1
+                st.rerun()
+    with col2:
+        if st.button("❌ End Tutorial", use_container_width=True, type="secondary"):
+            st.session_state.tutorial_step = -1
+            st.rerun()
+    with col3:
+        if current_step < len(steps) - 1:
+            if st.button("Next ➡️", use_container_width=True, type="primary"):
+                st.session_state.tutorial_step += 1
+                st.rerun()
+        else:
+            if st.button("Finish ✅", use_container_width=True, type="primary"):
+                st.session_state.tutorial_step = -1
+                st.rerun()
