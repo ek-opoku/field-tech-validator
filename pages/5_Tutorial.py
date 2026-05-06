@@ -71,7 +71,7 @@ else:
         *   **Upload CSV:** You can drop a CSV containing your site list.
         *   **Select Existing Sites:** Use the multiselect box to pick sites that are already loaded in the database.
         *   **Add New Site Manually:** If you are visiting a brand new well, expand the `➕ Add New Site Manually` section. Type in the Site ID, Latitude, and Longitude, and click "Add Custom Site". It will immediately appear in your selection box!
-        *   **Optimize:** Once selected, hit **Optimize Route** to let the app calculate the most efficient driving path.
+        *   **Optimize:** Once your sites have been uploaded, selected or added manually, hit **Optimize Route** to let the app calculate the most efficient driving path.
         """)
         img = load_image("tutorial_prep_route.png")
         if img: st.image(img, use_container_width=True, caption="Route & Sites Configuration")
