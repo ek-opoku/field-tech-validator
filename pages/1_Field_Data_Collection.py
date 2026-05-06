@@ -284,7 +284,7 @@ if not st.session_state.trip_started:
     st.header("Phase 1: Field Trip Prep")
     st.caption("Plan your route, configure parameters, and prepare for the field.")
     
-    tab_route, tab_params, tab_sop = st.tabs(["📍 Route & Sites", "⚙️ Parameters & Settings", "📝 Instructions"])
+    tab_route, tab_params, tab_sop = st.tabs(["📍 Route", "⚙️ Params", "📝 SOP"])
     
     with tab_route:
         st.write("Upload a CSV file with sites for your trip (Must contain 'SiteID', 'Latitude', and 'Longitude' headers) OR select from pre-existing sites below.")
