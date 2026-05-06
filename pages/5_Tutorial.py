@@ -24,7 +24,7 @@ if "tutorial_step" not in st.session_state:
 
 steps = [
     {"title": "Welcome to Field Tech Validator", "content": "intro"},
-    {"title": "1. Executive Dashboard", "content": "dashboard"},
+    {"title": "1. Project Overview", "content": "dashboard"},
     {"title": "2. Phase 1: Route Planning", "content": "route"},
     {"title": "3. Phase 1: Parameters & Cloud Config", "content": "params"},
     {"title": "4. Phase 1: SOP Document Upload", "content": "sop"},
@@ -86,7 +86,7 @@ else:
         *   **Time-Series Visualizations:** Track long-term trends for specific parameters.
         """)
         img = load_image("tutorial_dashboard.png")
-        if img: st.image(img, use_container_width=True, caption="Executive Dashboard Overview")
+        if img: st.image(img, use_container_width=True, caption="Project Overview Dashboard")
         
     elif step_data["content"] == "route":
         st.markdown("""

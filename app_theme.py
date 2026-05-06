@@ -153,13 +153,20 @@ def apply_water_theme() -> None:
             min-height: 80px !important;
             padding: 18px 24px !important;
             font-size: 1.35rem !important;
-            font-weight: 750 !important;
+            font-weight: 800 !important;
           }
           .stButton > button:hover,
           button[kind="primary"]:hover,
           button[kind="secondary"]:hover {
             background: #0a53be !important;
             border-color: #0848a4 !important;
+          }
+          .stButton > button p,
+          button[kind="primary"] p,
+          button[kind="secondary"] p {
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            -webkit-text-fill-color: #ffffff !important;
           }
 
           /* Tabs — room inside each label + space between tabs */
@@ -221,17 +228,28 @@ def apply_water_theme() -> None:
           }
 
           /* Input fields in main area */
+          [data-testid="stNumberInput"] input,
+          [data-testid="stTextInput"] input,
           [data-testid="stForm"] input,
           [data-testid="stSelectbox"] div[data-baseweb="select"] > div,
           [data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
           [data-testid="stDateInput"] input {
             background-color: #f8fafc !important;
             color: #0f172a !important;
-            border: 1px solid #cbd5e1 !important;
-            min-height: 64px !important;
-            font-size: 1.25rem !important;
-            padding: 0.5rem 1rem !important;
+            border: 2px solid #cbd5e1 !important;
+            min-height: 80px !important;
+            font-size: 1.5rem !important;
+            padding: 1rem 1.2rem !important;
             border-radius: 16px !important;
+          }
+          
+          /* Labels for inputs */
+          .stNumberInput label p,
+          .stTextInput label p,
+          .stSelectbox label p {
+             font-size: 1.3rem !important;
+             font-weight: 600 !important;
+             margin-bottom: 0.5rem !important;
           }
           [data-baseweb="popover"] > div {
             background-color: #ffffff !important;

@@ -101,7 +101,7 @@ def executive_metric_label_value(col: str, val) -> tuple[str, str]:
 st.title('Field Tech Validator')
 
 tab1, tab2, tab3 = st.tabs([
-    'Executive Dashboard', 
+    'Project Overview', 
     'Spatial Distribution', 
     'Time-Series Visualizations'
 ])
