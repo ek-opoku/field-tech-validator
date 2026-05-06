@@ -167,7 +167,13 @@ def apply_water_theme() -> None:
           .stTabs [data-baseweb="tab-list"] {
             gap: 0.5rem !important;
             padding: 0.2rem 0 0.35rem 0 !important;
-            flex-wrap: wrap !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: none; /* Hide scrollbar Firefox */
+          }
+          .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+            display: none; /* Hide scrollbar Webkit */
           }
           button[data-baseweb="tab"],
           [data-testid="stTab"] {
@@ -180,6 +186,7 @@ def apply_water_theme() -> None:
             line-height: 1.35 !important;
             box-sizing: border-box !important;
             margin: 0 !important;
+            flex-shrink: 0 !important;
           }
           button[data-baseweb="tab"] span,
           [data-testid="stTab"] span {
