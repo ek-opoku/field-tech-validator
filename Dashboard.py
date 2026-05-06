@@ -108,8 +108,8 @@ tab1, tab2, tab3 = st.tabs([
 
 with tab1:
     
+    st.subheader("Active Field Trip Status")
     if st.session_state.get("trip_started", False):
-        st.subheader("Active Field Trip Status")
         
         ordered = st.session_state.get("ordered_sites", [])
         completed = st.session_state.get("completed_sites", [])
@@ -168,7 +168,7 @@ with tab1:
                         label, value_s = executive_metric_label_value(c, val)
                         rows[i // 5][i % 5].metric(label, value_s)
     else:
-        st.info("💤 No active field trips currently ongoing.")
+        st.info("💤 No active field trips currently in progress. Navigate to **Field Data Collection** to start a new trip.", icon="ℹ️")
                     
     st.divider()
 
