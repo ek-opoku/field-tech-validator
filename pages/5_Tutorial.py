@@ -71,9 +71,6 @@ else:
     st.progress(current_step / max(1, len(steps) - 1))
     st.write("") # spacer
     
-    render_nav_buttons("top")
-    st.divider()
-    
     if step_data["content"] == "intro":
         st.write("Welcome to the **Interactive Field Tech Validator Tutorial**! This app is your daily companion, designed to streamline your workflow from route planning to active field sampling, ensuring all data is validated and safely synced to the cloud.")
         st.info("Click **Next** below to start the comprehensive guide.")
