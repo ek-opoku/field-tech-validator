@@ -17,3 +17,5 @@ pillow
 pytesseract
 vosk
 
+pypdf
+python-docx

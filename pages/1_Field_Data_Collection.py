@@ -16,6 +16,15 @@ import sys
 import pandas as pd
 import streamlit as st
 from streamlit_geolocation import streamlit_geolocation
+import io
+try:
+    from pypdf import PdfReader
+except ImportError:
+    PdfReader = None
+try:
+    import docx
+except ImportError:
+    docx = None
 
 # Add the project root to sys.path to import local modules
 project_root = str(Path(__file__).resolve().parents[1])
@@ -255,6 +264,8 @@ if "compliance_standard" not in st.session_state: st.session_state.compliance_st
 if "historical_bounds" not in st.session_state: st.session_state.historical_bounds = {}
 if "gatekeeper_override" not in st.session_state: st.session_state.gatekeeper_override = False
 if "show_gatekeeper" not in st.session_state: st.session_state.show_gatekeeper = False
+if "sop_text" not in st.session_state: st.session_state.sop_text = ""
+if "sop_filename" not in st.session_state: st.session_state.sop_filename = ""
 
 # Parameter List
 ALL_PARAMS = [
@@ -336,6 +347,7 @@ if not st.session_state.trip_started:
                 
     with tab_params:
         st.subheader("Parameter Configuration")
+        st.info("All parameters are enabled by default. You do not need to configure anything here unless you want to exclude specific parameters from your field trip.", icon="✅")
         st.write("Select which parameters you will collect on this trip:")
         selected = []
         col_p1, col_p2 = st.columns(2)
@@ -358,21 +370,52 @@ if not st.session_state.trip_started:
             )
         
     with tab_sop:
-        st.subheader("SOP Review (Voice SOP)")
-        if "voice_on" not in st.session_state: st.session_state.voice_on = False
-        if "voice_transcript" not in st.session_state: st.session_state.voice_transcript = ""
-        v1, v2 = st.columns(2)
-        if v1.button("Voice SOP (mic)", type="primary", use_container_width=True): st.session_state.voice_on = True
-        if v2.button("Close mic", type="secondary", use_container_width=True, disabled=not st.session_state.voice_on): st.session_state.voice_on = False
-        if st.session_state.voice_on:
-            audio = st.audio_input("Record audio") if hasattr(st, "audio_input") else st.file_uploader("Upload audio (WAV)", type=["wav"])
-            if audio:
-                mdir = Path(os.environ.get("VOSK_MODEL_DIR", str(Path(__file__).resolve().parents[1] / "edge_app" / "models" / "vosk")))
-                with st.spinner("Transcribing..."):
-                    text, err = transcribe_audio_offline(audio.getvalue(), model_dir=mdir)
-                if err: st.error(err)
-                else: st.session_state.voice_transcript = text or ""
-        st.text_area("Voice SOP transcript", value=st.session_state.voice_transcript, height=110)
+        st.subheader("Field Assistant & SOP")
+        st.write("Upload Standard Operating Procedures (SOPs) or field instructions here. They will be available for quick reference and audio read-out during data collection.")
+        
+        sop_file = st.file_uploader("Upload Instructions Document", type=["txt", "md", "pdf", "docx"])
+        if sop_file:
+            if sop_file.name != st.session_state.sop_filename:
+                with st.spinner("Parsing document..."):
+                    extracted_text = ""
+                    try:
+                        ext = Path(sop_file.name).suffix.lower()
+                        if ext in [".txt", ".md"]:
+                            extracted_text = sop_file.getvalue().decode("utf-8", errors="ignore")
+                        elif ext == ".pdf" and PdfReader is not None:
+                            reader = PdfReader(io.BytesIO(sop_file.getvalue()))
+                            for page in reader.pages:
+                                extracted_text += page.extract_text() + "\n\n"
+                        elif ext == ".docx" and docx is not None:
+                            doc = docx.Document(io.BytesIO(sop_file.getvalue()))
+                            extracted_text = "\n".join([p.text for p in doc.paragraphs])
+                        else:
+                            st.error(f"Cannot parse {ext} files (missing dependency or unsupported format).")
+                    except Exception as e:
+                        st.error(f"Error parsing document: {e}")
+                    
+                    if extracted_text.strip():
+                        st.session_state.sop_text = extracted_text.strip()
+                        st.session_state.sop_filename = sop_file.name
+                        st.success(f"Successfully loaded {sop_file.name}")
+            else:
+                st.success(f"Loaded: {st.session_state.sop_filename}")
+                
+        with st.expander("Voice Dictation Tool (Optional)", expanded=False):
+            if "voice_on" not in st.session_state: st.session_state.voice_on = False
+            if "voice_transcript" not in st.session_state: st.session_state.voice_transcript = ""
+            v1, v2 = st.columns(2)
+            if v1.button("Voice SOP (mic)", type="primary", use_container_width=True): st.session_state.voice_on = True
+            if v2.button("Close mic", type="secondary", use_container_width=True, disabled=not st.session_state.voice_on): st.session_state.voice_on = False
+            if st.session_state.voice_on:
+                audio = st.audio_input("Record audio") if hasattr(st, "audio_input") else st.file_uploader("Upload audio (WAV)", type=["wav"])
+                if audio:
+                    mdir = Path(os.environ.get("VOSK_MODEL_DIR", str(Path(__file__).resolve().parents[1] / "edge_app" / "models" / "vosk")))
+                    with st.spinner("Transcribing..."):
+                        text, err = transcribe_audio_offline(audio.getvalue(), model_dir=mdir)
+                    if err: st.error(err)
+                    else: st.session_state.voice_transcript = text or ""
+            st.text_area("Voice SOP transcript", value=st.session_state.voice_transcript, height=110)
 
     st.divider()
     if st.button("Begin Trip", type="primary", use_container_width=True):
@@ -541,6 +584,29 @@ else:
         if st.button("End Trip & Return to Prep", type="secondary"):
             st.session_state.pending_end_trip = True
             st.rerun()
+
+    if st.session_state.sop_text:
+        with st.expander("📖 SOP Quick Reference", expanded=False):
+            st.write("You can read the uploaded SOP below or have it read aloud to you.")
+            import json
+            safe_text = json.dumps(st.session_state.sop_text)
+            tts_html = f"""
+            <script>
+            function readAloud() {{
+                const text = {safe_text};
+                const utterance = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utterance);
+            }}
+            function stopAloud() {{
+                window.speechSynthesis.cancel();
+            }}
+            </script>
+            <button onclick="readAloud()" style="padding:8px 12px; border-radius:5px; background-color:#0284c7; color:white; border:none; cursor:pointer; margin-right:10px;">🔊 Read Aloud</button>
+            <button onclick="stopAloud()" style="padding:8px 12px; border-radius:5px; background-color:#ef4444; color:white; border:none; cursor:pointer;">⏹ Stop Audio</button>
+            """
+            st.components.v1.html(tts_html, height=40)
+            
+            st.markdown(st.session_state.sop_text)
 
     st.divider()
     
