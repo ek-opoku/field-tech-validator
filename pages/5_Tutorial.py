@@ -36,6 +36,27 @@ steps = [
 
 current_step = st.session_state.tutorial_step
 
+def render_nav_buttons(key_suffix):
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col1:
+        if current_step > 0:
+            if st.button("⬅️ Previous", use_container_width=True, key=f"prev_{key_suffix}"):
+                st.session_state.tutorial_step -= 1
+                st.rerun()
+    with col2:
+        if st.button("❌ End Tutorial", use_container_width=True, type="secondary", key=f"end_{key_suffix}"):
+            st.session_state.tutorial_step = -1
+            st.rerun()
+    with col3:
+        if current_step < len(steps) - 1:
+            if st.button("Next ➡️", use_container_width=True, type="primary", key=f"next_{key_suffix}"):
+                st.session_state.tutorial_step += 1
+                st.rerun()
+        else:
+            if st.button("Finish ✅", use_container_width=True, type="primary", key=f"finish_{key_suffix}"):
+                st.session_state.tutorial_step = -1
+                st.rerun()
+
 if current_step == -1:
     st.title("📚 Tutorial Concluded")
     st.success("You're ready for the field! Head over to **Field Data Collection** from the sidebar to start your first trip.")
@@ -48,8 +69,10 @@ else:
     
     # Progress bar
     st.progress(current_step / max(1, len(steps) - 1))
-    
     st.write("") # spacer
+    
+    render_nav_buttons("top")
+    st.divider()
     
     if step_data["content"] == "intro":
         st.write("Welcome to the **Interactive Field Tech Validator Tutorial**! This app is your daily companion, designed to streamline your workflow from route planning to active field sampling, ensuring all data is validated and safely synced to the cloud.")
@@ -140,23 +163,4 @@ else:
         if img: st.image(img, use_container_width=True, caption="Chain of Custody Generator")
 
     st.divider()
-    
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col1:
-        if current_step > 0:
-            if st.button("⬅️ Previous", use_container_width=True):
-                st.session_state.tutorial_step -= 1
-                st.rerun()
-    with col2:
-        if st.button("❌ End Tutorial", use_container_width=True, type="secondary"):
-            st.session_state.tutorial_step = -1
-            st.rerun()
-    with col3:
-        if current_step < len(steps) - 1:
-            if st.button("Next ➡️", use_container_width=True, type="primary"):
-                st.session_state.tutorial_step += 1
-                st.rerun()
-        else:
-            if st.button("Finish ✅", use_container_width=True, type="primary"):
-                st.session_state.tutorial_step = -1
-                st.rerun()
+    render_nav_buttons("bottom")
