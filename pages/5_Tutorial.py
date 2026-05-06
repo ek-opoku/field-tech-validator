@@ -40,25 +40,25 @@ def render_nav_buttons(key_suffix):
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
         if current_step > 0:
-            if st.button("⬅️ Previous", use_container_width=True, key=f"prev_{key_suffix}"):
+            if st.button("Previous", use_container_width=True, key=f"prev_{key_suffix}"):
                 st.session_state.tutorial_step -= 1
                 st.rerun()
     with col2:
-        if st.button("❌ End Tutorial", use_container_width=True, type="secondary", key=f"end_{key_suffix}"):
+        if st.button("End Tutorial", use_container_width=True, type="secondary", key=f"end_{key_suffix}"):
             st.session_state.tutorial_step = -1
             st.rerun()
     with col3:
         if current_step < len(steps) - 1:
-            if st.button("Next ➡️", use_container_width=True, type="primary", key=f"next_{key_suffix}"):
+            if st.button("Next", use_container_width=True, type="primary", key=f"next_{key_suffix}"):
                 st.session_state.tutorial_step += 1
                 st.rerun()
         else:
-            if st.button("Finish ✅", use_container_width=True, type="primary", key=f"finish_{key_suffix}"):
+            if st.button("Finish", use_container_width=True, type="primary", key=f"finish_{key_suffix}"):
                 st.session_state.tutorial_step = -1
                 st.rerun()
 
 if current_step == -1:
-    st.title("📚 Tutorial Concluded")
+    st.title("Tutorial Concluded")
     st.success("You're ready for the field! Head over to **Field Data Collection** from the sidebar to start your first trip.")
     if st.button("Restart Tutorial"):
         st.session_state.tutorial_step = 0
@@ -93,7 +93,7 @@ else:
         To begin a new field trip, navigate to **Field Data Collection**. The first step is defining your route:
         *   **Upload CSV:** You can drop a CSV containing your site list.
         *   **Select Existing Sites:** Use the multiselect box to pick sites that are already loaded in the database.
-        *   **Add New Site Manually:** If you are visiting a brand new well, expand the `➕ Add New Site Manually` section. Type in the Site ID, Latitude, and Longitude, and click "Add Custom Site". It will immediately appear in your selection box!
+        *   **Add New Site Manually:** If you are visiting a brand new well, expand the `Add New Site Manually` section. Type in the Site ID, Latitude, and Longitude, and click "Add Custom Site". It will immediately appear in your selection box!
         *   **Optimize:** Once your sites have been uploaded, selected or added manually, hit **Optimize Route** to let the app calculate the most efficient driving path.
         """)
         img = load_image("tutorial_prep_route.png")
@@ -101,7 +101,7 @@ else:
         
     elif step_data["content"] == "params":
         st.markdown("""
-        Next, move to the **⚙️ Parameters & Settings** tab.
+        Next, move to the **Parameters & Settings** tab.
         *   **Select Parameters:** By default, ALL parameters are pre-selected so you don't have to check them manually. You can uncheck any that you won't be testing today.
         *   **Advanced Configuration:** Expand this section to set up your cloud connection!
             *   Enter your **Cloud Ingest URL** (e.g., your central database endpoint).
@@ -112,7 +112,7 @@ else:
         
     elif step_data["content"] == "sop":
         st.markdown("""
-        The final prep step is the **📝 Instructions** tab.
+        The final prep step is the **Instructions** tab.
         *   **SOP Upload:** You can upload your Standard Operating Procedures as a `PDF`, `Word Doc (.docx)`, `Markdown`, or `TXT` file.
         *   The app will parse the document text and save it into the system so that it can be read aloud to you while you are physically taking samples.
         *   Once your route, parameters, and SOP are set, you are ready to hit **Begin Trip**.
@@ -135,8 +135,8 @@ else:
     elif step_data["content"] == "assistant":
         st.markdown("""
         Also in Phase 2, you have access to the **Field Assistant**.
-        *   Look for the `📖 SOP Quick Reference` expander near the top of the collection screen.
-        *   **Read Aloud Feature:** Expand the section and click the **🔊 Read Aloud** button. Your device will use offline text-to-speech to read the SOP instructions you uploaded earlier. 
+        *   Look for the `SOP Quick Reference` expander near the top of the collection screen.
+        *   **Read Aloud Feature:** Expand the section and click the **Read Aloud** button. Your device will use offline text-to-speech to read the SOP instructions you uploaded earlier. 
         *   This allows you to keep your gloves on and focus entirely on sampling the water without having to look back at the screen!
         """)
         img = load_image("tutorial_sampling.png")
@@ -145,8 +145,8 @@ else:
     elif step_data["content"] == "sync":
         st.markdown("""
         When your trip is complete and you drive back into cell service, head to the **Gateway Sync** page.
-        *   **Auto-Sync Mode:** Toggle the **🔄 Auto-Sync Mode** switch to ON. The app will automatically detect your internet connection and push your offline queue securely to the cloud ingest URL you configured.
-        *   **Visual Audit:** Expand the `🔍 View Buffered Records` section to see a spreadsheet-like view of exactly what records are waiting to be uploaded.
+        *   **Auto-Sync Mode:** Toggle the **Auto-Sync Mode** switch to ON. The app will automatically detect your internet connection and push your offline queue securely to the cloud ingest URL you configured.
+        *   **Visual Audit:** Expand the `View Buffered Records` section to see a spreadsheet-like view of exactly what records are waiting to be uploaded.
         *   **Emergency Export:** If you are permanently offline, you can use the **Download Buffer to USB Backup** button to manually export the pending queue.
         """)
         img = load_image("tutorial_sync.png")

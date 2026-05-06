@@ -168,7 +168,7 @@ with tab1:
                         label, value_s = executive_metric_label_value(c, val)
                         rows[i // 5][i % 5].metric(label, value_s)
     else:
-        st.info("💤 No active field trips currently in progress. Navigate to **Field Data Collection** to start a new trip.", icon="ℹ️")
+        st.info("No active field trips currently in progress. Navigate to **Field Data Collection** to start a new trip.")
                     
     st.divider()
 
@@ -299,7 +299,7 @@ with tab3:
     with clr_col:
         st.write("") # Vertical spacing
         st.write("") 
-        st.button("❌ Clear Selection", key="clear_ts_btn", use_container_width=True, on_click=clear_ts_selection)
+        st.button("Clear Selection", key="clear_ts_btn", use_container_width=True, on_click=clear_ts_selection)
 
     filter_col1, filter_col2, filter_col3 = st.columns(3)
     

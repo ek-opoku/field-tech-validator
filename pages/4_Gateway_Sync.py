@@ -38,17 +38,17 @@ col_status, col_auto = st.columns([2, 1])
 
 with col_status:
     if not cfg.ingest_url:
-        st.warning("⚠️ No Cloud Ingest URL configured.")
+        st.warning("No Cloud Ingest URL configured.")
         online_status = False
     else:
         online_status = is_online(cfg.ingest_url, timeout_seconds=1.5)
         if online_status:
-            st.success("🟢 Online: Connected to Cloud Database")
+            st.success("Online: Connected to Cloud Database")
         else:
-            st.error("🔴 Offline: Cloud Database Unreachable")
+            st.error("Offline: Cloud Database Unreachable")
 
 with col_auto:
-    auto_sync = st.toggle("🔄 Enable Auto-Sync Mode", value=st.session_state.get("auto_sync", False))
+    auto_sync = st.toggle("Enable Auto-Sync Mode", value=st.session_state.get("auto_sync", False))
     st.session_state.auto_sync = auto_sync
 
 if auto_sync:
@@ -83,14 +83,14 @@ with col2:
     st.metric("Offline Buffered Rows", buffered_count)
 
 # ---------------- Visual Audit & Export ----------------
-with st.expander("🔍 View Buffered Records & Export", expanded=False):
+with st.expander("View Buffered Records & Export", expanded=False):
     if buffered_count > 0:
         df_buffer = pd.DataFrame(rows)
         st.dataframe(df_buffer, use_container_width=True)
         
         csv_data = df_buffer.to_csv(index=False).encode('utf-8')
         st.download_button(
-            label="💾 Download Buffer to USB Backup",
+            label="Download Buffer to USB Backup",
             data=csv_data,
             file_name=f"gateway_buffer_backup_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
             mime="text/csv",

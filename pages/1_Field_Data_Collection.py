@@ -284,7 +284,7 @@ if not st.session_state.trip_started:
     st.header("Phase 1: Field Trip Prep")
     st.caption("Plan your route, configure parameters, and prepare for the field.")
     
-    tab_route, tab_params, tab_sop = st.tabs(["📍 Route & Sites", "⚙️ Parameters & Settings", "📝 Instructions"])
+    tab_route, tab_params, tab_sop = st.tabs(["Route & Sites", "Parameters & Settings", "Instructions"])
     
     with tab_route:
         st.write("Upload a CSV file with sites for your trip (Must contain 'SiteID', 'Latitude', and 'Longitude' headers) OR select from pre-existing sites below.")
@@ -306,7 +306,7 @@ if not st.session_state.trip_started:
         site_options = [s.id for s in st.session_state.preloaded_sites]
         selected_site_ids = st.multiselect("Choose sites for today:", options=site_options, default=[])
         
-        with st.expander("➕ Add New Site Manually", expanded=False):
+        with st.expander("Add New Site Manually", expanded=False):
             col_c1, col_c2, col_c3 = st.columns([2, 1, 1])
             with col_c1:
                 custom_id = st.text_input("New Site ID", placeholder="e.g. WELL-999")
@@ -343,11 +343,11 @@ if not st.session_state.trip_started:
                 st.error("Select at least one site.")
                 
         if st.session_state.ordered_sites:
-            st.info(f"📍 Route optimized for {len(st.session_state.ordered_sites)} sites. Ready to begin trip.")
+            st.info(f"Route optimized for {len(st.session_state.ordered_sites)} sites. Ready to begin trip.")
                 
     with tab_params:
         st.subheader("Parameter Configuration")
-        st.info("All parameters are enabled by default. You do not need to configure anything here unless you want to exclude specific parameters from your field trip.", icon="✅")
+        st.info("All parameters are enabled by default. You do not need to configure anything here unless you want to exclude specific parameters from your field trip.")
         st.write("Select which parameters you will collect on this trip:")
         selected = []
         col_p1, col_p2 = st.columns(2)
@@ -419,10 +419,13 @@ if not st.session_state.trip_started:
 
     st.divider()
     if st.button("Begin Trip", type="primary", use_container_width=True):
-        st.session_state.trip_started = True
-        st.session_state.pending_end_trip = False
-        st.session_state.trip_data = []
-        st.rerun()
+        if not st.session_state.get("ordered_sites", []):
+            st.error("Please define sites or locations for your trip by selecting them and clicking 'Optimize Route' before starting.")
+        else:
+            st.session_state.trip_started = True
+            st.session_state.pending_end_trip = False
+            st.session_state.trip_data = []
+            st.rerun()
 
 else:
     # ---------------- PHASE 2: ACTIVE TRIP ----------------
@@ -529,7 +532,7 @@ else:
         unsynced_files = list(iter_incoming_csv_files(INBOX_DIR))
         buffer_exists = BUFFER_PATH.exists() and os.path.getsize(BUFFER_PATH) > 0
         if unsynced_files or buffer_exists:
-            st.error("⚠️ WARNING: You have unsynced offline data! Ensure internet is connected to sync before ending.")
+            st.error("WARNING: You have unsynced offline data! Ensure internet is connected to sync before ending.")
             
             # Compile offline data for download backup
             all_dfs = []
@@ -544,7 +547,7 @@ else:
                 combined_df = pd.concat(all_dfs, ignore_index=True)
                 csv_data = combined_df.to_csv(index=False).encode('utf-8')
                 st.download_button(
-                    label="📥 Download Offline Data Backup (CSV)",
+                    label="Download Offline Data Backup (CSV)",
                     data=csv_data,
                     file_name=f"field_trip_backup_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
@@ -586,7 +589,7 @@ else:
             st.rerun()
 
     if st.session_state.sop_text:
-        with st.expander("📖 SOP Quick Reference", expanded=False):
+        with st.expander("SOP Quick Reference", expanded=False):
             st.write("You can read the uploaded SOP below or have it read aloud to you.")
             import json
             safe_text = json.dumps(st.session_state.sop_text)
@@ -601,7 +604,7 @@ else:
                 window.speechSynthesis.cancel();
             }}
             </script>
-            <button onclick="readAloud()" style="padding:8px 12px; border-radius:5px; background-color:#0284c7; color:white; border:none; cursor:pointer; margin-right:10px;">🔊 Read Aloud</button>
+            <button onclick="readAloud()" style="padding:8px 12px; border-radius:5px; background-color:#0284c7; color:white; border:none; cursor:pointer; margin-right:10px;">Read Aloud</button>
             <button onclick="stopAloud()" style="padding:8px 12px; border-radius:5px; background-color:#ef4444; color:white; border:none; cursor:pointer;">⏹ Stop Audio</button>
             """
             st.components.v1.html(tts_html, height=40)
@@ -636,7 +639,7 @@ else:
 
         # Render a custom clear button above the selectbox if something is selected
         if st.session_state.site_select_key is not None:
-            if st.button("❌ Clear Selection", key="clear_site"):
+            if st.button("Clear Selection", key="clear_site"):
                 st.session_state.site_select_key = None
                 st.rerun()
                 
@@ -668,7 +671,7 @@ else:
                 if dist > 0.5:
                     st.error(f"**🚨 GPS VERIFICATION FAILED:** You are {dist:.2f} miles away from {target_site.id}. Please verify you are at the correct location!")
                 else: 
-                    st.success(f"**✅ GPS Verified:** You are physically at {target_site.id}.")
+                    st.success(f"**GPS Verified:** You are physically at {target_site.id}.")
                     
         with st.expander("View/Edit Metadata & GPS", expanded=False):
             activity_start_date = st.date_input("Activity Date (Auto-Captured on Save)", value=dt.date.today(), disabled=True)
@@ -847,7 +850,7 @@ else:
                             if is_online(st.session_state.ingest_url, timeout_seconds=3.0):
                                 try:
                                     post_batch_json(st.session_state.ingest_url, [row_data])
-                                    st.success("✅ Saved directly to Cloud!")
+                                    st.success("Saved directly to Cloud!")
                                     saved = True
                                 except Exception as e:
                                     st.error(f"Cloud push failed: {e}. Falling back to offline save.")
