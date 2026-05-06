@@ -35,6 +35,35 @@ from utils.geo_helpers import parse_sites_from_dataframe, find_nearest_site, sol
 from utils.qc_guard import check_sanity_limits, load_historical_bounds, evaluate_historical_bounds, check_compliance, COMPLIANCE_STANDARDS
 from app_theme import apply_water_theme
 
+apply_water_theme()
+st.markdown(
+    """
+    <style>
+      /* Field Collection Specific: Larger Input fields */
+      [data-testid="stNumberInput"] input,
+      [data-testid="stTextInput"] input,
+      [data-testid="stForm"] input,
+      [data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+      [data-testid="stMultiSelect"] div[data-baseweb="select"] > div,
+      [data-testid="stDateInput"] input {
+        border: 2px solid #cbd5e1 !important;
+        min-height: 80px !important;
+        font-size: 1.5rem !important;
+        padding: 1rem 1.2rem !important;
+      }
+      /* Labels for inputs */
+      .stNumberInput label p,
+      .stTextInput label p,
+      .stSelectbox label p {
+         font-size: 1.3rem !important;
+         font-weight: 600 !important;
+         margin-bottom: 0.5rem !important;
+      }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Gateway imports for cloud sync
 from gateway_sync.gateway_bridge import is_online, post_batch_json, process_inbox_once, try_sync_once, Config, load_expected_headers, iter_incoming_csv_files
 from cloud_analytics.chain_of_custody_report import render_coc_pdf, red_flags, compute_lta_from_processed
