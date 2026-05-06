@@ -149,10 +149,10 @@ def apply_water_theme() -> None:
             background: #0b5ed7 !important;
             color: #ffffff !important;
             border: 1px solid #0a53be !important;
-            border-radius: 20px !important;
-            min-height: 80px !important;
-            padding: 18px 24px !important;
-            font-size: 1.35rem !important;
+            border-radius: 10px !important;
+            min-height: 3.5rem !important;
+            padding: 0.65rem 1rem !important;
+            font-size: 1.15rem !important;
             font-weight: 800 !important;
           }
           .stButton > button:hover,

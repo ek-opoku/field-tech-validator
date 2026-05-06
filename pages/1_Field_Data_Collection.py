@@ -59,6 +59,16 @@ st.markdown(
          font-weight: 600 !important;
          margin-bottom: 0.5rem !important;
       }
+      
+      /* Field Collection Specific: Larger Buttons */
+      .stButton > button,
+      button[kind="primary"],
+      button[kind="secondary"] {
+        border-radius: 20px !important;
+        min-height: 80px !important;
+        padding: 18px 24px !important;
+        font-size: 1.35rem !important;
+      }
     </style>
     """,
     unsafe_allow_html=True
