@@ -20,7 +20,7 @@ SCHEMA_HEADERS = [
     "Temperature, water (deg C)",
     "Turbidity (NTU)",
     "pH (standard units)",
-    "Oxygen, dissolved (mg/L)",
+    "Dissolved Oxygen (mg/L)",
 ]
 
 INBOX_DIR = Path(__file__).resolve().parent / "inbox"
@@ -45,7 +45,7 @@ class Reading:
             "Temperature, water (deg C)": "" if self.temperature_c is None else f"{self.temperature_c}",
             "Turbidity (NTU)": "" if self.turbidity_ntu is None else f"{self.turbidity_ntu}",
             "pH (standard units)": "" if self.ph is None else f"{self.ph}",
-            "Oxygen, dissolved (mg/L)": "" if self.dissolved_oxygen_mg_l is None else f"{self.dissolved_oxygen_mg_l}",
+            "Dissolved Oxygen (mg/L)": "" if self.dissolved_oxygen_mg_l is None else f"{self.dissolved_oxygen_mg_l}",
         }
 
 
@@ -294,7 +294,7 @@ def parse_meter_ocr(ocr_text: str) -> dict[str, float]:
         ("Temperature, water (deg C)", r"(?:temp|temperature)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
         ("Turbidity (NTU)", r"(?:turb|turbidity)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
         ("pH (standard units)", r"(?:\bph\b)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
-        ("Oxygen, dissolved (mg/L)", r"(?:\bdo\b|oxygen)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
+        ("Dissolved Oxygen (mg/L)", r"(?:\bdo\b|oxygen)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
     ]
     for header, pat in patterns:
         m = re.search(pat, t, flags=re.IGNORECASE)
@@ -359,7 +359,7 @@ def load_long_term_averages(schema_csv_path: Path) -> dict[str, float]:
         "Temperature, water (deg C)",
         "Turbidity (NTU)",
         "pH (standard units)",
-        "Oxygen, dissolved (mg/L)",
+        "Dissolved Oxygen (mg/L)",
     ]
     sums: dict[str, float] = {h: 0.0 for h in numeric_headers}
     counts: dict[str, int] = {h: 0 for h in numeric_headers}
@@ -495,7 +495,7 @@ def qc_warnings(
     if turbidity_ntu is not None:
         _avg_warn("Turbidity (NTU)", float(turbidity_ntu))
     if dissolved_oxygen_mg_l is not None:
-        _avg_warn("Oxygen, dissolved (mg/L)", float(dissolved_oxygen_mg_l))
+        _avg_warn("Dissolved Oxygen (mg/L)", float(dissolved_oxygen_mg_l))
     return warnings
 
 
@@ -651,12 +651,12 @@ else:
     )
 
 if nm_do:
-    st.text_input("Oxygen, dissolved (mg/L)", value="", disabled=True)
+    st.text_input("Dissolved Oxygen (mg/L)", value="", disabled=True)
     dissolved_oxygen_mg_l = None
 else:
     dissolved_oxygen_mg_l = st.number_input(
-        "Oxygen, dissolved (mg/L)",
-        value=float(ocr.get("Oxygen, dissolved (mg/L)", 0.0)) if "Oxygen, dissolved (mg/L)" in ocr else 0.0,
+        "Dissolved Oxygen (mg/L)",
+        value=float(ocr.get("Dissolved Oxygen (mg/L)", 0.0)) if "Dissolved Oxygen (mg/L)" in ocr else 0.0,
         step=0.1,
         format="%.2f",
     )

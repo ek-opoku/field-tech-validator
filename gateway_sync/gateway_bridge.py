@@ -46,7 +46,7 @@ SNAKE_TO_RAW_HEADERS = {
     "water_temp_c": "Temperature, water (deg C)",
     "turbidity_ntu": "Turbidity (NTU)",
     "ph": "pH (standard units)",
-    "dissolved_oxygen_mg_l": "Oxygen, dissolved (mg/L)",
+    "dissolved_oxygen_mg_l": "Dissolved Oxygen (mg/L)",
     "latitude": "ActivityLocation/LatitudeMeasure",
     "longitude": "ActivityLocation/LongitudeMeasure",
 }

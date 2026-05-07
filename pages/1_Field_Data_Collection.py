@@ -87,11 +87,11 @@ SCHEMA_HEADERS = [
     "Temperature, water (deg C)",
     "Turbidity (NTU)",
     "pH (standard units)",
-    "Oxygen, dissolved (mg/L)",
-    "Oxygen, dissolved (% saturation)",
+    "Dissolved Oxygen (mg/L)",
+    "Dissolved Oxygen (% saturation)",
     "Nitrate, dissolved (mg/L as N)",
     "Nitrite, dissolved (mg/L as N)",
-    "Orthophosphate, dissolved (mg/L as P)",
+    "Phosphate, dissolved (mg/L as P)",
     "Conductivity (uS/cm)",
     "Depth to water table (m)",
     "EdgeQCFlags",
@@ -130,11 +130,11 @@ class Reading:
             "Temperature, water (deg C)": "" if self.temperature_c is None else f"{self.temperature_c}",
             "Turbidity (NTU)": "" if self.turbidity_ntu is None else f"{self.turbidity_ntu}",
             "pH (standard units)": "" if self.ph is None else f"{self.ph}",
-            "Oxygen, dissolved (mg/L)": "" if self.dissolved_oxygen_mg_l is None else f"{self.dissolved_oxygen_mg_l}",
-            "Oxygen, dissolved (% saturation)": "" if self.dissolved_oxygen_sat is None else f"{self.dissolved_oxygen_sat}",
+            "Dissolved Oxygen (mg/L)": "" if self.dissolved_oxygen_mg_l is None else f"{self.dissolved_oxygen_mg_l}",
+            "Dissolved Oxygen (% saturation)": "" if self.dissolved_oxygen_sat is None else f"{self.dissolved_oxygen_sat}",
             "Nitrate, dissolved (mg/L as N)": "" if self.nitrate is None else f"{self.nitrate}",
             "Nitrite, dissolved (mg/L as N)": "" if self.nitrite is None else f"{self.nitrite}",
-            "Orthophosphate, dissolved (mg/L as P)": "" if self.orthophosphate is None else f"{self.orthophosphate}",
+            "Phosphate, dissolved (mg/L as P)": "" if self.orthophosphate is None else f"{self.orthophosphate}",
             "Conductivity (uS/cm)": "" if self.conductivity is None else f"{self.conductivity}",
             "Depth to water table (m)": "" if self.depth_to_water is None else f"{self.depth_to_water}",
             "EdgeQCFlags": self.edge_qc_flags or "",
@@ -169,8 +169,8 @@ def parse_meter_ocr(ocr_text: str) -> dict[str, float]:
         ("Temperature, water (deg C)", r"(?:temp|temperature)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
         ("Turbidity (NTU)", r"(?:turb|turbidity)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
         ("pH (standard units)", r"(?:\bph\b)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
-        ("Oxygen, dissolved (mg/L)", r"(?:\bdo\b|oxygen)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
-        ("Oxygen, dissolved (% saturation)", r"(?:sat|saturation)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
+        ("Dissolved Oxygen (mg/L)", r"(?:\bdo\b|oxygen)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
+        ("Dissolved Oxygen (% saturation)", r"(?:sat|saturation)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
         ("Conductivity (uS/cm)", r"(?:cond|conductivity)\s*[:=]?\s*(-?\d+(?:\.\d+)?)"),
     ]
     for header, pat in patterns:
@@ -209,7 +209,7 @@ def _safe_float(s: str) -> float | None:
 def load_long_term_averages(schema_csv_path: Path) -> dict[str, float]:
     if not schema_csv_path.exists():
         return {}
-    numeric_headers = ["Temperature, water (deg C)", "Turbidity (NTU)", "pH (standard units)", "Oxygen, dissolved (mg/L)"]
+    numeric_headers = ["Temperature, water (deg C)", "Turbidity (NTU)", "pH (standard units)", "Dissolved Oxygen (mg/L)"]
     sums = {h: 0.0 for h in numeric_headers}
     counts = {h: 0 for h in numeric_headers}
     
@@ -279,7 +279,7 @@ def qc_warnings(*, ph: float | None, temperature_c: float | None, turbidity_ntu:
             warnings.append(f"{header} is unusually high vs long-term avg ({value:.2f} > {avg * factor:.2f}).")
     if temperature_c is not None: _avg_warn("Temperature, water (deg C)", float(temperature_c))
     if turbidity_ntu is not None: _avg_warn("Turbidity (NTU)", float(turbidity_ntu))
-    if dissolved_oxygen_mg_l is not None: _avg_warn("Oxygen, dissolved (mg/L)", float(dissolved_oxygen_mg_l))
+    if dissolved_oxygen_mg_l is not None: _avg_warn("Dissolved Oxygen (mg/L)", float(dissolved_oxygen_mg_l))
     return warnings
 
 
@@ -310,7 +310,7 @@ if "sop_filename" not in st.session_state: st.session_state.sop_filename = ""
 ALL_PARAMS = [
     "pH", "Temperature", "Turbidity", 
     "DO (Dissolved Oxygen)", "DOsat (DO Saturation)", 
-    "Nitrate", "Nitrite", "Orthophosphate", 
+    "Nitrate", "Nitrite", "Phosphate", 
     "Conductivity", "Depth to Water"
 ]
 if "selected_params" not in st.session_state:
@@ -789,15 +789,15 @@ else:
         with tab_chem:
             for p in st.session_state.selected_params:
                 if p == "pH": _render_param("pH (standard units)", "ph", float(ocr.get("pH (standard units)")) if "pH (standard units)" in ocr else None, 0.01)
-                elif p == "DO (Dissolved Oxygen)": _render_param("Oxygen, dissolved (mg/L)", "dissolved_oxygen_mg_l", float(ocr.get("Oxygen, dissolved (mg/L)")) if "Oxygen, dissolved (mg/L)" in ocr else None, 0.1)
-                elif p == "DOsat (DO Saturation)": _render_param("Oxygen, dissolved (% saturation)", "dissolved_oxygen_sat", float(ocr.get("Oxygen, dissolved (% saturation)")) if "Oxygen, dissolved (% saturation)" in ocr else None, 0.1)
+                elif p == "DO (Dissolved Oxygen)": _render_param("Dissolved Oxygen (mg/L)", "dissolved_oxygen_mg_l", float(ocr.get("Dissolved Oxygen (mg/L)")) if "Dissolved Oxygen (mg/L)" in ocr else None, 0.1)
+                elif p == "DOsat (DO Saturation)": _render_param("Dissolved Oxygen (% saturation)", "dissolved_oxygen_sat", float(ocr.get("Dissolved Oxygen (% saturation)")) if "Dissolved Oxygen (% saturation)" in ocr else None, 0.1)
                 elif p == "Conductivity": _render_param("Conductivity (uS/cm)", "conductivity", float(ocr.get("Conductivity (uS/cm)")) if "Conductivity (uS/cm)" in ocr else None, 1.0)
                 
         with tab_nutr:
             for p in st.session_state.selected_params:
                 if p == "Nitrate": _render_param("Nitrate, dissolved (mg/L as N)", "nitrate", None, 0.1)
                 elif p == "Nitrite": _render_param("Nitrite, dissolved (mg/L as N)", "nitrite", None, 0.1)
-                elif p == "Orthophosphate": _render_param("Orthophosphate, dissolved (mg/L as P)", "orthophosphate", None, 0.1)
+                elif p == "Phosphate": _render_param("Phosphate, dissolved (mg/L as P)", "orthophosphate", None, 0.1)
 
         st.markdown("""
         <style>

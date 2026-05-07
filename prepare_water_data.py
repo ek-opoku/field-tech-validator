@@ -14,7 +14,7 @@ RAW_TO_CLEAN_COLUMNS: dict[str, str] = {
     "ActivityLocation/LongitudeMeasure": "longitude",
     "Nitrate, dissolved (mg/L as N)": "nitrate_mg_l_as_n",
     "Nitrite, dissolved (mg/L as N)": "nitrite_mg_l_as_n",
-    "Orthophosphate, dissolved (mg/L as P)": "orthophosphate_mg_l_as_p",
+    "Orthophosphate, dissolved (mg/L as P)": "phosphate_mg_l_as_p",
     "Oxygen, dissolved (% saturation)": "dissolved_oxygen_percent_sat",
     "Oxygen, dissolved (mg/L)": "dissolved_oxygen_mg_l",
     "Temperature, water (deg C)": "water_temp_c",
@@ -68,7 +68,7 @@ def clean_water_data(df_raw: pd.DataFrame) -> pd.DataFrame:
         "longitude",
         "nitrate_mg_l_as_n",
         "nitrite_mg_l_as_n",
-        "orthophosphate_mg_l_as_p",
+        "phosphate_mg_l_as_p",
         "dissolved_oxygen_percent_sat",
         "dissolved_oxygen_mg_l",
         "water_temp_c",
@@ -95,7 +95,7 @@ def clean_water_data(df_raw: pd.DataFrame) -> pd.DataFrame:
     for non_negative in [
         "nitrate_mg_l_as_n",
         "nitrite_mg_l_as_n",
-        "orthophosphate_mg_l_as_p",
+        "phosphate_mg_l_as_p",
         "dissolved_oxygen_mg_l",
         "turbidity_ntu",
     ]:

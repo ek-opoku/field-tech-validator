@@ -12,6 +12,11 @@ def load_data():
     file_path = "data_wide_imputed.csv.gz"
     if os.path.exists(file_path):
         df = pd.read_csv(file_path, parse_dates=["Date"])
+        df.rename(columns={
+            "Oxygen, dissolved (mg/L)": "Dissolved Oxygen (mg/L)",
+            "Oxygen, dissolved (% saturation)": "Dissolved Oxygen (% saturation)",
+            "Orthophosphate, dissolved (mg/L as P)": "Phosphate, dissolved (mg/L as P)",
+        }, inplace=True)
         numeric_cols = df.select_dtypes(include=['float64', 'float32']).columns
         cols_to_round = [c for c in numeric_cols if c not in ['Latitude', 'Longitude']]
         df[cols_to_round] = df[cols_to_round].round(2)
@@ -25,9 +30,9 @@ def load_data():
             "Longitude": [-104.0, -104.1, -104.2],
             "Nitrate, dissolved (mg/L as N)": [1.0, 2.0, 1.5],
             "Nitrite, dissolved (mg/L as N)": [0.1, 0.2, 0.15],
-            "Orthophosphate, dissolved (mg/L as P)": [0.05, 0.06, 0.04],
-            "Oxygen, dissolved (% saturation)": [90.0, 85.0, 88.0],
-            "Oxygen, dissolved (mg/L)": [8.0, 7.5, 7.8],
+            "Phosphate, dissolved (mg/L as P)": [0.05, 0.06, 0.04],
+            "Dissolved Oxygen (% saturation)": [90.0, 85.0, 88.0],
+            "Dissolved Oxygen (mg/L)": [8.0, 7.5, 7.8],
             "Temperature, water (deg C)": [15.0, 16.0, 14.5],
             "Turbidity (NTU)": [2.0, 3.0, 1.5],
             "pH (standard units)": [7.2, 7.4, 7.3]
@@ -48,7 +53,7 @@ def _spatial_colorscale_for_param(param_display_name: str):
         "Dissolved Oxygen (% sat)": px.colors.sequential.Purples,
         "Nitrate": px.colors.sequential.OrRd,
         "Nitrite": px.colors.sequential.Reds,
-        "Orthophosphate": px.colors.sequential.PuRd,
+        "Phosphate": px.colors.sequential.PuRd,
         "Conductivity": px.colors.sequential.Plasma,
         "Depth to Water": px.colors.sequential.Cividis,
     }
@@ -59,11 +64,11 @@ _PARAM_SHORT_NAMES: dict[str, str] = {
     "pH (standard units)": "pH",
     "Temperature, water (deg C)": "Temperature",
     "Turbidity (NTU)": "Turbidity",
-    "Oxygen, dissolved (mg/L)": "Dissolved oxygen",
-    "Oxygen, dissolved (% saturation)": "DO saturation",
+    "Dissolved Oxygen (mg/L)": "Dissolved Oxygen",
+    "Dissolved Oxygen (% saturation)": "DO saturation",
     "Nitrate, dissolved (mg/L as N)": "Nitrate",
     "Nitrite, dissolved (mg/L as N)": "Nitrite",
-    "Orthophosphate, dissolved (mg/L as P)": "Orthophosphate",
+    "Phosphate, dissolved (mg/L as P)": "Phosphate",
     "Conductivity (uS/cm)": "Conductivity",
     "Depth to water table (m)": "Depth to water",
     "Latitude": "Latitude",
@@ -97,7 +102,7 @@ def executive_metric_label_value(col: str, val) -> tuple[str, str]:
         v = float(val)
     except (TypeError, ValueError):
         return label, str(val)
-    if col == "Oxygen, dissolved (% saturation)":
+    if col == "Dissolved Oxygen (% saturation)":
         formatted = f"{int(round(v))}"
     else:
         formatted = f"{v:,.2f}" if abs(v) >= 1000 else f"{v:.2f}"
@@ -184,9 +189,9 @@ with tab1:
     st.write("**Global averages (mean)**")
     all_params = [
         "pH (standard units)", "Temperature, water (deg C)", "Turbidity (NTU)", 
-        "Oxygen, dissolved (mg/L)", "Oxygen, dissolved (% saturation)",
+        "Dissolved Oxygen (mg/L)", "Dissolved Oxygen (% saturation)",
         "Nitrate, dissolved (mg/L as N)", "Nitrite, dissolved (mg/L as N)",
-        "Orthophosphate, dissolved (mg/L as P)", "Conductivity (uS/cm)", "Depth to water table (m)"
+        "Phosphate, dissolved (mg/L as P)", "Conductivity (uS/cm)", "Depth to water table (m)"
     ]
     
     metric_cols = [st.columns(5) for _ in range(2)]
@@ -202,11 +207,11 @@ with tab2:
         "pH": "pH (standard units)",
         "Temperature": "Temperature, water (deg C)",
         "Turbidity": "Turbidity (NTU)",
-        "Dissolved Oxygen (mg/L)": "Oxygen, dissolved (mg/L)",
-        "Dissolved Oxygen (% sat)": "Oxygen, dissolved (% saturation)",
+        "Dissolved Oxygen (mg/L)": "Dissolved Oxygen (mg/L)",
+        "Dissolved Oxygen (% sat)": "Dissolved Oxygen (% saturation)",
         "Nitrate": "Nitrate, dissolved (mg/L as N)",
         "Nitrite": "Nitrite, dissolved (mg/L as N)",
-        "Orthophosphate": "Orthophosphate, dissolved (mg/L as P)",
+        "Phosphate": "Phosphate, dissolved (mg/L as P)",
         "Conductivity": "Conductivity (uS/cm)",
         "Depth to Water": "Depth to water table (m)"
     }
@@ -247,7 +252,7 @@ with tab2:
         )
         # Aggregate to prevent plotting 1M points on the map
         df_map = df_map.groupby(["SiteID", "Latitude", "Longitude"], as_index=False)[column_name].mean()
-        if column_name == "Oxygen, dissolved (% saturation)":
+        if column_name == "Dissolved Oxygen (% saturation)":
             df_map[column_name] = df_map[column_name].round(0)
         else:
             df_map[column_name] = df_map[column_name].round(2)
@@ -316,9 +321,9 @@ with tab3:
     # Parameters to choose from
     all_ts_params = [
         "pH (standard units)", "Temperature, water (deg C)", "Turbidity (NTU)", 
-        "Oxygen, dissolved (mg/L)", "Oxygen, dissolved (% saturation)",
+        "Dissolved Oxygen (mg/L)", "Dissolved Oxygen (% saturation)",
         "Nitrate, dissolved (mg/L as N)", "Nitrite, dissolved (mg/L as N)",
-        "Orthophosphate, dissolved (mg/L as P)", "Conductivity (uS/cm)", "Depth to water table (m)"
+        "Phosphate, dissolved (mg/L as P)", "Conductivity (uS/cm)", "Depth to water table (m)"
     ]
     # Filter only available columns
     available_ts_params = [p for p in all_ts_params if p in df.columns]
@@ -362,7 +367,7 @@ with tab3:
     else:
         df_agg = df_filtered.groupby("AggDate")[selected_ts_param].mean().reset_index()
         
-    if selected_ts_param == "Oxygen, dissolved (% saturation)":
+    if selected_ts_param == "Dissolved Oxygen (% saturation)":
         df_agg[selected_ts_param] = df_agg[selected_ts_param].round(0)
     else:
         df_agg[selected_ts_param] = df_agg[selected_ts_param].round(2)
@@ -403,7 +408,7 @@ with tab3:
         title_str = f"Temporal Trend: {y_col}" if color_col else f"Global Average: {y_col}"
         
         # If no sites selected, use specialized area charts for some parameters. If sites selected, use multiple lines.
-        if not color_col and any(n in y_col for n in ["Nitrate", "Nitrite", "Orthophosphate", "Turbidity"]):
+        if not color_col and any(n in y_col for n in ["Nitrate", "Nitrite", "Phosphate", "Turbidity"]):
             fig_ts = px.area(
                 df_agg, x="Date", y=y_col, title=title_str,
                 color_discrete_sequence=["#10b981"]
@@ -435,14 +440,14 @@ with tab3:
         if "Nitrite" in y_col:
             fig_ts.add_hline(y=1.0, line_dash="dash", line_color="red", annotation_text="EPA MCL (1.0)", annotation_font_color="red")
             
-        if "Orthophosphate" in y_col:
+        if "Phosphate" in y_col:
             fig_ts.add_hline(y=0.03, line_dash="dash", line_color="green", annotation_text="Background (0.03)", annotation_font_color="green")
             fig_ts.add_hline(y=0.10, line_dash="dash", line_color="red", annotation_text="High Concern (>0.1)", annotation_font_color="red")
             
-        if "Oxygen, dissolved (% saturation)" in y_col:
+        if "Dissolved Oxygen (% saturation)" in y_col:
             fig_ts.add_hrect(y0=80, y1=120, line_width=0, fillcolor="green", opacity=0.1, annotation_text="Healthy (80-120%)", annotation_position="top left")
             
-        if "Oxygen, dissolved (mg/L)" in y_col:
+        if "Dissolved Oxygen (mg/L)" in y_col:
             fig_ts.add_hrect(
                 y0=0, y1=1.0, line_width=0, fillcolor="red", opacity=0.15,
                 annotation_text="Anoxic/Hypoxic (<1.0 mg/L)", annotation_position="top left",
@@ -469,7 +474,7 @@ with tab3:
     with sc_col1:
         x_param = st.selectbox("X-Axis Parameter:", options=available_ts_params, index=available_ts_params.index("Temperature, water (deg C)") if "Temperature, water (deg C)" in available_ts_params else 0)
     with sc_col2:
-        y_param = st.selectbox("Y-Axis Parameter:", options=available_ts_params, index=available_ts_params.index("Oxygen, dissolved (mg/L)") if "Oxygen, dissolved (mg/L)" in available_ts_params else min(1, len(available_ts_params)-1))
+        y_param = st.selectbox("Y-Axis Parameter:", options=available_ts_params, index=available_ts_params.index("Dissolved Oxygen (mg/L)") if "Dissolved Oxygen (mg/L)" in available_ts_params else min(1, len(available_ts_params)-1))
     with sc_col3:
         scatter_site = st.selectbox("Select Site for Correlation:", options=["All Sites"] + all_sites, index=0)
         
