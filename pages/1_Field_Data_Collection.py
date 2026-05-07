@@ -94,6 +94,7 @@ SCHEMA_HEADERS = [
     "Phosphate, dissolved (mg/L as P)",
     "Conductivity (uS/cm)",
     "Depth to water table (m)",
+    "FieldTechnician",
     "EdgeQCFlags",
 ]
 
@@ -119,6 +120,7 @@ class Reading:
     orthophosphate: float | None
     conductivity: float | None
     depth_to_water: float | None
+    field_technician: str = ""
     edge_qc_flags: str | None = None
 
     def to_row(self) -> dict[str, str]:
@@ -137,6 +139,7 @@ class Reading:
             "Phosphate, dissolved (mg/L as P)": "" if self.orthophosphate is None else f"{self.orthophosphate}",
             "Conductivity (uS/cm)": "" if self.conductivity is None else f"{self.conductivity}",
             "Depth to water table (m)": "" if self.depth_to_water is None else f"{self.depth_to_water}",
+            "FieldTechnician": self.field_technician or "",
             "EdgeQCFlags": self.edge_qc_flags or "",
         }
 
@@ -305,6 +308,7 @@ if "gatekeeper_override" not in st.session_state: st.session_state.gatekeeper_ov
 if "show_gatekeeper" not in st.session_state: st.session_state.show_gatekeeper = False
 if "sop_text" not in st.session_state: st.session_state.sop_text = ""
 if "sop_filename" not in st.session_state: st.session_state.sop_filename = ""
+if "field_technician" not in st.session_state: st.session_state.field_technician = ""
 
 # Parameter List
 ALL_PARAMS = [
@@ -458,9 +462,16 @@ if not st.session_state.trip_started:
             st.text_area("Voice SOP transcript", value=st.session_state.voice_transcript, height=110)
 
     st.divider()
+    st.session_state.field_technician = st.text_input(
+        "Field Technician Name", 
+        value=st.session_state.field_technician,
+        placeholder="e.g., John Smith"
+    )
     if st.button("Begin Trip", type="primary", use_container_width=True):
         if not st.session_state.get("ordered_sites", []):
             st.error("Please define sites or locations for your trip by selecting them and clicking 'Optimize Route' before starting.")
+        elif not st.session_state.field_technician.strip():
+            st.error("Please enter the Field Technician name before starting the trip.")
         else:
             st.session_state.trip_started = True
             st.session_state.pending_end_trip = False
@@ -879,7 +890,8 @@ else:
                         orthophosphate=params_map.get("orthophosphate"),
                         conductivity=params_map.get("conductivity"),
                         depth_to_water=params_map.get("depth_to_water"),
-                        edge_qc_flags="|".join(all_warnings + all_dangers) if st.session_state.gatekeeper_override else ""
+                        edge_qc_flags="|".join(all_warnings + all_dangers) if st.session_state.gatekeeper_override else "",
+                        field_technician=st.session_state.get("field_technician", ""),
                     )
                     st.session_state.gatekeeper_override = False
                     row_data = reading.to_row()

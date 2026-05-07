@@ -61,6 +61,7 @@ EXPECTED_HEADERS = [
     "Phosphate, dissolved (mg/L as P)",
     "Conductivity (uS/cm)",
     "Depth to water table (m)",
+    "FieldTechnician",
     "EdgeQCFlags",
 ]
 
@@ -323,6 +324,11 @@ def render_coc_pdf(
     story.append(Paragraph(f"Sites Visited: <b>{len(locations)}</b>", body))
     story.append(Paragraph(f"Total Samples (Rows): <b>{len(rows)}</b>", body))
     story.append(Paragraph(f"Locations: <b>{loc_summary or '—'}</b>", body))
+    
+    # Field Technician info
+    techs = sorted({(r.get("FieldTechnician") or "").strip() for r in rows if (r.get("FieldTechnician") or "").strip()})
+    tech_summary = ", ".join(techs) if techs else "Not Recorded"
+    story.append(Paragraph(f"Field Technician(s): <b>{tech_summary}</b>", body))
     story.append(Spacer(1, 0.18 * inch))
 
     if param_stats:
