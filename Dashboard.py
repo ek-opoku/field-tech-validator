@@ -12,6 +12,9 @@ def load_data():
     file_path = "data_wide_imputed.csv.gz"
     if os.path.exists(file_path):
         df = pd.read_csv(file_path, parse_dates=["Date"])
+        numeric_cols = df.select_dtypes(include=['float64', 'float32']).columns
+        cols_to_round = [c for c in numeric_cols if c not in ['Latitude', 'Longitude']]
+        df[cols_to_round] = df[cols_to_round].round(2)
         return df
     else:
         # Fallback dictionary of dummy data mirroring the CSV headers

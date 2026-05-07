@@ -86,6 +86,10 @@ with col2:
 with st.expander("View Buffered Records & Export", expanded=False):
     if buffered_count > 0:
         df_buffer = pd.DataFrame(rows)
+        numeric_cols = df_buffer.select_dtypes(include=['float64', 'float32']).columns
+        cols_to_round = [c for c in numeric_cols if c not in ['Latitude', 'Longitude']]
+        if len(cols_to_round) > 0:
+            df_buffer[cols_to_round] = df_buffer[cols_to_round].round(2)
         st.dataframe(df_buffer, use_container_width=True)
         
         csv_data = df_buffer.to_csv(index=False).encode('utf-8')
