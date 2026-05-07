@@ -69,6 +69,13 @@ st.markdown(
         padding: 18px 24px !important;
         font-size: 1.35rem !important;
       }
+      
+      /* Ensure input containers have breathing room */
+      [data-testid="stTextInput"],
+      [data-testid="stNumberInput"],
+      [data-testid="stSelectbox"] {
+        margin-bottom: 1.5rem !important;
+      }
     </style>
     """,
     unsafe_allow_html=True
@@ -462,11 +469,16 @@ if not st.session_state.trip_started:
             st.text_area("Voice SOP transcript", value=st.session_state.voice_transcript, height=110)
 
     st.divider()
+    st.markdown(
+        """<div style="margin-bottom: 2rem;">""",
+        unsafe_allow_html=True
+    )
     st.session_state.field_technician = st.text_input(
         "Field Technician Name", 
         value=st.session_state.field_technician,
         placeholder="e.g., John Smith"
     )
+    st.markdown("</div>", unsafe_allow_html=True)
     st.write("")
     st.write("")
     if st.button("Begin Trip", type="primary", use_container_width=True):
