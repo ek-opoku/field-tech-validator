@@ -467,6 +467,8 @@ if not st.session_state.trip_started:
         value=st.session_state.field_technician,
         placeholder="e.g., John Smith"
     )
+    st.write("")
+    st.write("")
     if st.button("Begin Trip", type="primary", use_container_width=True):
         if not st.session_state.get("ordered_sites", []):
             st.error("Please define sites or locations for your trip by selecting them and clicking 'Optimize Route' before starting.")
