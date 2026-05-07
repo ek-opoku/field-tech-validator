@@ -396,17 +396,18 @@ if not st.session_state.trip_started:
                 selected.append(p)
         st.session_state.selected_params = selected
         
+        st.divider()
+        st.write("Select Compliance Standard for Real-Time Checking:")
+        standard_opts = list(COMPLIANCE_STANDARDS.keys())
+        st.session_state.compliance_standard = st.selectbox(
+            "Compliance Standard", 
+            standard_opts,
+            index=standard_opts.index(st.session_state.compliance_standard) if st.session_state.compliance_standard in standard_opts else 0
+        )
+        
         with st.expander("Advanced Configuration", expanded=False):
             st.write("Provide your central database Ingest URL. Data will save automatically to cloud if internet is available.")
             st.session_state.ingest_url = st.text_input("Cloud Ingest URL:", value=st.session_state.ingest_url, placeholder="https://api.example.com/ingest")
-            
-            st.write("Select Compliance Standard for Real-Time Checking:")
-            standard_opts = list(COMPLIANCE_STANDARDS.keys())
-            st.session_state.compliance_standard = st.selectbox(
-                "Compliance Standard", 
-                standard_opts,
-                index=standard_opts.index(st.session_state.compliance_standard) if st.session_state.compliance_standard in standard_opts else 0
-            )
         
     with tab_sop:
         st.subheader("Field Assistant & SOP")
