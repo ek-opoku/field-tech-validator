@@ -97,7 +97,10 @@ def executive_metric_label_value(col: str, val) -> tuple[str, str]:
         v = float(val)
     except (TypeError, ValueError):
         return label, str(val)
-    formatted = f"{v:,.2f}" if abs(v) >= 1000 else f"{v:.2f}"
+    if col == "Oxygen, dissolved (% saturation)":
+        formatted = f"{int(round(v))}"
+    else:
+        formatted = f"{v:,.2f}" if abs(v) >= 1000 else f"{v:.2f}"
     return label, formatted
 
 
@@ -244,6 +247,10 @@ with tab2:
         )
         # Aggregate to prevent plotting 1M points on the map
         df_map = df_map.groupby(["SiteID", "Latitude", "Longitude"], as_index=False)[column_name].mean()
+        if column_name == "Oxygen, dissolved (% saturation)":
+            df_map[column_name] = df_map[column_name].round(0)
+        else:
+            df_map[column_name] = df_map[column_name].round(2)
         cmap = _spatial_colorscale_for_param(param_name)
         fig = px.scatter_mapbox(
             df_map,
@@ -354,6 +361,11 @@ with tab3:
         df_agg = df_filtered.groupby(["AggDate", "SiteID"])[selected_ts_param].mean().reset_index()
     else:
         df_agg = df_filtered.groupby("AggDate")[selected_ts_param].mean().reset_index()
+        
+    if selected_ts_param == "Oxygen, dissolved (% saturation)":
+        df_agg[selected_ts_param] = df_agg[selected_ts_param].round(0)
+    else:
+        df_agg[selected_ts_param] = df_agg[selected_ts_param].round(2)
         
     df_agg.rename(columns={"AggDate": "Date"}, inplace=True)
     
